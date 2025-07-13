@@ -493,7 +493,21 @@
 
   <div class="admin-section hidden" id="adminSection">
     <h2>Tableau de Bord Administrateur</h2>
-    
+    <div class="form-group" style="margin-top:2rem">
+  <label for="graphPartieFilter">Afficher les graphiques pour :</label>
+  <select id="graphPartieFilter" onchange="renderCharts()">
+    <option value="">-- Sélectionnez une partie prenante --</option>
+    <option value="Laverie">Laverie</option>
+    <option value="Séchage">Séchage</option>
+    <option value="Pipeline">Pipeline</option>
+    <option value="Train">Train</option>
+    <option value="APC (Pulpe)">APC (Pulpe)</option>
+    <option value="Chargement Navire">Chargement Navire</option>
+  </select>
+</div>
+<canvas id="stockChart" height="150"></canvas>
+<canvas id="cdChart" height="150" style="margin-top: 2rem;"></canvas>
+
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value" id="totalEntries">0</div>
@@ -636,9 +650,79 @@
         <tbody id="dataTable"></tbody>
       </table>
     </div>
+    <button onclick="exporterExcel()">Exporter vers Excel</button>
+
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+<!-- Add Chart.js CDN to <head> -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let stockChartInstance, cdChartInstance;
+
+function renderCharts() {
+  const selectedPartie = document.getElementById('graphPartieFilter').value;
+  const stockCtx = document.getElementById('stockChart').getContext('2d');
+  const cdCtx = document.getElementById('cdChart').getContext('2d');
+
+  const filtered = donnees.filter(d => d.partie === selectedPartie).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  const labels = filtered.map(d => formatDate(d.date));
+  const stockValues = filtered.map(d => d.stock);
+  const cdValues = filtered.map(d => d.cd);
+
+  if (stockChartInstance) stockChartInstance.destroy();
+  if (cdChartInstance) cdChartInstance.destroy();
+
+  stockChartInstance = new Chart(stockCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Stock (K TSM)',
+        data: stockValues,
+        backgroundColor: 'rgba(0,100,0,0.2)',
+        borderColor: '#006400',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: `Evolution du stock - ${selectedPartie}` } }
+    }
+  });
+
+  cdChartInstance = new Chart(cdCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Concentration Cd (mg/Kg)',
+        data: cdValues,
+        backgroundColor: 'rgba(255,165,0,0.2)',
+        borderColor: '#FFA500',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: `Evolution du Cd - ${selectedPartie}` } }
+    }
+  });
+}
+</script>
+<script>
+ const supabaseUrl = 'https://htdkfnrivusmgwwpirka.supabase.co'; // ← à remplacer
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZGtmbnJpdnVzbWd3d3BpcmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTg5ODcsImV4cCI6MjA2Nzk5NDk4N30.et4RmPMAl6ovERF9drafjATikXGOVisZhNU2hNuh35I'; // ← à remplacer
+
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script> 
 <script>
   let donnees = [];
 
@@ -662,6 +746,31 @@ donnees = donneesLocal ? JSON.parse(donneesLocal) : [];
     });
   });
   
+  async function enregistrerDonnees() {
+  const partie = document.getElementById("partie").value;
+  const stock = parseFloat(document.getElementById("stock").value);
+  const cd = parseFloat(document.getElementById("cd").value);
+  const responsable = document.getElementById("responsable").value.trim();
+  const date = document.getElementById("date").value;
+
+  if (!partie || !stock || !cd || !responsable || !date) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('donnees')
+    .insert([{ partie, stock, cd, responsable, date }]);
+
+  if (error) {
+    console.error('Erreur Supabase :', error.message);
+    alert("❌ Une erreur est survenue.");
+  } else {
+    console.log('✅ Données enregistrées :', data);
+    alert("✅ Données enregistrées avec succès !");
+  }
+}
+
   function enregistrerDonnees() {
     const partie = document.getElementById("partie").value;
     const stock = parseFloat(document.getElementById("stock").value);
@@ -722,6 +831,34 @@ donnees = donneesLocal ? JSON.parse(donneesLocal) : [];
     document.getElementById("adminPass").value = "";
     hideMessage("loginError");
   }
+  
+  async function afficherTable() {
+  const { data, error } = await supabase
+    .from('donnees')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) {
+    console.error('Erreur de chargement:', error.message);
+    return;
+  }
+
+  const table = document.getElementById("dataTable");
+  table.innerHTML = "";
+
+  data.forEach(d => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${d.partie}</td>
+      <td>${d.stock.toFixed(2)}</td>
+      <td>${d.cd.toFixed(2)}</td>
+      <td>${d.responsable}</td>
+      <td>${new Date(d.date).toLocaleDateString('fr-FR')}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
 
   function afficherTable() {
     const table = document.getElementById("dataTable");
@@ -851,6 +988,30 @@ function mettreAJourIndicateurs() {
     });
   }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  function exporterExcel() {
+    if (donnees.length === 0) {
+      alert("Aucune donnée à exporter.");
+      return;
+    }
+
+    const dataToExport = donnees.map(d => ({
+      "Partie Prenante": d.partie,
+      "Stock (K TSM)": d.stock,
+      "Cd (mg/Kg)": d.cd,
+      "Responsable": d.responsable,
+      "Date": d.date
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Données");
+
+    XLSX.writeFile(workbook, "donnees_produit_JLC.xlsx");
+  }
+</script>
+
 <div id="popupOverlay" class="popup-overlay hidden">
   <div class="popup">
     <span class="close-btn" onclick="closePopup()">×</span>
