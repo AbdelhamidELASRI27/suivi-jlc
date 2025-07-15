@@ -487,6 +487,8 @@
       <div class="form-actions">
         <button type="button" class="reset-btn" onclick="resetForm()">Réinitialiser</button>
         <button type="submit">Valider</button>
+
+
       </div>
     </form>
   </div>
@@ -718,12 +720,6 @@ function renderCharts() {
 }
 </script>
 <script>
- const supabaseUrl = 'https://htdkfnrivusmgwwpirka.supabase.co'; // ← à remplacer
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZGtmbnJpdnVzbWd3d3BpcmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTg5ODcsImV4cCI6MjA2Nzk5NDk4N30.et4RmPMAl6ovERF9drafjATikXGOVisZhNU2hNuh35I'; // ← à remplacer
-
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-</script> 
-<script>
   let donnees = [];
 
 const donneesLocal = localStorage.getItem('donnees');
@@ -745,16 +741,48 @@ donnees = donneesLocal ? JSON.parse(donneesLocal) : [];
       }
     });
   });
-  
-  async function enregistrerDonnees() {
+  // ✅ Initialisation Supabase
+const supabaseUrl = 'https://htdkfnrivusmgwwpirka.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZGtmbnJpdnVzbWd3d3BpcmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTg5ODcsImV4cCI6MjA2Nzk5NDk4N30.et4RmPMAl6ovERF9drafjATikXGOVisZhNU2hNuh35I';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// ✅ Chargement DOM complet
+window.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('date').valueAsDate = new Date();
+
+  document.getElementById('adminPass').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      checkLogin();
+    }
+  });
+
+  // ✅ Charger les données existantes depuis Supabase
+  const { data, error } = await supabase.from('donnees').select('*');
+  if (error) {
+    console.error('Erreur de chargement des données Supabase :', error.message);
+  } else {
+    donnees = data || [];
+    updateStats();
+    afficherTable();
+    mettreAJourIndicateurs();
+  }
+});
+
+let isSubmitting = false;
+
+async function enregistrerDonnees() {
+  if (isSubmitting) return;
+  isSubmitting = true;
+
   const partie = document.getElementById("partie").value;
   const stock = parseFloat(document.getElementById("stock").value);
   const cd = parseFloat(document.getElementById("cd").value);
   const responsable = document.getElementById("responsable").value.trim();
   const date = document.getElementById("date").value;
 
-  if (!partie || !stock || !cd || !responsable || !date) {
-    alert("Veuillez remplir tous les champs.");
+  if (!partie || isNaN(stock) || isNaN(cd) || !responsable || !date) {
+    showMessage("❌ Champs manquants ou invalides", "error");
+    isSubmitting = false;
     return;
   }
 
@@ -763,170 +791,117 @@ donnees = donneesLocal ? JSON.parse(donneesLocal) : [];
     .insert([{ partie, stock, cd, responsable, date }]);
 
   if (error) {
-    console.error('Erreur Supabase :', error.message);
-    alert("❌ Une erreur est survenue.");
-  } else {
-    console.log('✅ Données enregistrées :', data);
-    alert("✅ Données enregistrées avec succès !");
-  }
-}
-
-  function enregistrerDonnees() {
-    const partie = document.getElementById("partie").value;
-    const stock = parseFloat(document.getElementById("stock").value);
-    const cd = parseFloat(document.getElementById("cd").value);
-    const responsable = document.getElementById("responsable").value.trim();
-    const date = document.getElementById("date").value;
-
-    // Validation
-    if (!partie || !stock || !cd || !responsable || !date) {
-      showMessage("Veuillez remplir tous les champs obligatoires.", "error");
-      return;
-    }
-
-    if (stock < 0 || cd < 0) {
-      showMessage("Les valeurs numériques ne peuvent pas être négatives.", "error");
-      return;
-    }
-
-    const data = { 
-      partie, 
-      stock, 
-      cd, 
-      responsable, 
-      date,
-      timestamp: new Date().toISOString()
-    };
-    
-    donnees.push(data);
-    localStorage.setItem('donnees', JSON.stringify(donnees));
-
-    showMessage("Données enregistrées avec succès ✅", "success");
-    document.getElementById("productForm").reset();
-    document.getElementById('date').valueAsDate = new Date();
-    
-    // Toujours sauvegarder les données dans le stockage local (simulation)
-    console.log("Données sauvegardées:", data);
-    console.log("Total des entrées:", donnees.length);
-  }
-
-  function checkLogin() {
-    const pass = document.getElementById("adminPass").value;
-    if (pass === "admin123") {
-      document.getElementById("loginBox").classList.add("hidden");
-      document.getElementById("adminSection").classList.remove("hidden");
-      document.getElementById("dataForm").classList.add("hidden"); // Masquer le formulaire
-      updateStats();
-      afficherTable();
-      hideMessage("loginError");
-    } else {
-      showMessage("Mot de passe incorrect ❌", "error", "loginError");
-    }
-  }
-
-  function logout() {
-    document.getElementById("loginBox").classList.remove("hidden");
-    document.getElementById("adminSection").classList.add("hidden");
-    document.getElementById("dataForm").classList.remove("hidden"); // Réafficher le formulaire
-    document.getElementById("adminPass").value = "";
-    hideMessage("loginError");
-  }
-  
-  async function afficherTable() {
-  const { data, error } = await supabase
-    .from('donnees')
-    .select('*')
-    .order('date', { ascending: false });
-
-  if (error) {
-    console.error('Erreur de chargement:', error.message);
+    showMessage("Erreur Supabase : " + error.message, "error");
+    isSubmitting = false;
     return;
   }
 
+  showMessage("✅ Données enregistrées avec succès !", "success");
+  donnees.push({ partie, stock, cd, responsable, date });
+  localStorage.setItem('donnees', JSON.stringify(donnees));
+  updateStats();
+  afficherTable();
+  mettreAJourIndicateurs();
+  document.getElementById("productForm").reset();
+  document.getElementById('date').valueAsDate = new Date();
+
+  isSubmitting = false;
+}
+
+function checkLogin() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === "admin123") {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminSection").classList.remove("hidden");
+    document.getElementById("dataForm").classList.add("hidden");
+    updateStats();
+    afficherTable();
+    hideMessage("loginError");
+  } else {
+    showMessage("Mot de passe incorrect ❌", "error", "loginError");
+  }
+}
+
+function showMessage(message, type, elementId = null) {
+  const el = document.getElementById(elementId || (type === 'error' ? 'errorMessage' : 'successMessage'));
+  el.textContent = message;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function hideMessage(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function updateStats() {
+  const totalEntries = donnees.length;
+  const totalStock = donnees.reduce((sum, d) => sum + (parseFloat(d.stock) || 0), 0);
+  const avgCd = totalEntries > 0 ? donnees.reduce((sum, d) => sum + (parseFloat(d.cd) || 0), 0) / totalEntries : 0;
+
+  document.getElementById("totalEntries").textContent = totalEntries;
+  document.getElementById("totalStock").textContent = totalStock.toFixed(2);
+  document.getElementById("avgCd").textContent = avgCd.toFixed(2);
+}
+function toggleTableView() {
+  const table = document.getElementById("tableContainer");
+  const btn = document.getElementById("toggleTableBtn");
+
+  if (table.classList.contains("hidden")) {
+    table.classList.remove("hidden");
+    btn.textContent = "Masquer le tableau";
+  } else {
+    table.classList.add("hidden");
+    btn.textContent = "Afficher le tableau";
+  }
+}
+
+function afficherTable() {
   const table = document.getElementById("dataTable");
   table.innerHTML = "";
 
-  data.forEach(d => {
+  const donneesTriees = [...donnees].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  donneesTriees.forEach(d => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${d.partie}</td>
-      <td>${d.stock.toFixed(2)}</td>
-      <td>${d.cd.toFixed(2)}</td>
+      <td>${parseFloat(d.stock).toFixed(2)}</td>
+      <td>${parseFloat(d.cd).toFixed(2)}</td>
       <td>${d.responsable}</td>
-      <td>${new Date(d.date).toLocaleDateString('fr-FR')}</td>
+      <td>${formatDate(d.date)}</td>
     `;
     table.appendChild(row);
   });
 }
 
+  function logout() {
+  // Réinitialiser l'affichage des sections
+  document.getElementById("adminSection").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
+  document.getElementById("dataForm").classList.remove("hidden");
 
-  function afficherTable() {
-    const table = document.getElementById("dataTable");
-    table.innerHTML = "";
-    
-    console.log("Affichage table - Nombre de données:", donnees.length);
-    console.log("Données:", donnees);
-    
-    if (donnees.length === 0) {
-      table.innerHTML = "<tr><td colspan='5' style='text-align: center; color: #666;'>Aucune donnée disponible</td></tr>";
-      return;
-    }
-    
-    // Tri par date décroissante
-    const donneesTriees = [...donnees].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    donneesTriees.forEach(d => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${d.partie}</td>
-        <td>${parseFloat(d.stock).toFixed(2)}</td>
-        <td>${parseFloat(d.cd).toFixed(2)}</td>
-        <td>${d.responsable}</td>
-        <td>${formatDate(d.date)}</td>
-      `;
-      table.appendChild(row);
-    });
-  }
-
-  function updateStats() {
-    const totalEntries = donnees.length;
-    const totalStock = donnees.reduce((sum, d) => sum + d.stock, 0);
-    const avgCd = donnees.length > 0 ? donnees.reduce((sum, d) => sum + d.cd, 0) / donnees.length : 0;
-    
-    document.getElementById('totalEntries').textContent = totalEntries;
-    document.getElementById('totalStock').textContent = totalStock.toFixed(2);
-    document.getElementById('avgCd').textContent = avgCd.toFixed(2);
-  }
-
-  function resetForm() {
-    document.getElementById("productForm").reset();
-    document.getElementById('date').valueAsDate = new Date();
-    hideMessage("successMessage");
-    hideMessage("errorMessage");
-  }
-
-  function showMessage(message, type, elementId = null) {
-    const messageElement = document.getElementById(elementId || (type === "error" ? "errorMessage" : "successMessage"));
-    messageElement.textContent = message;
-    messageElement.style.display = "block";
-    
-    setTimeout(() => {
-      hideMessage(elementId || (type === "error" ? "errorMessage" : "successMessage"));
-    }, 5000);
-  }
-  function toggleTableView() {
-  const container = document.getElementById("tableContainer");
-  const btn = document.getElementById("toggleTableBtn");
-
-  if (container.classList.contains("hidden")) {
-    container.classList.remove("hidden");
-    btn.textContent = "Masquer le tableau";
-    afficherTable(); // Affiche les données si ce n'est pas déjà fait
-  } else {
-    container.classList.add("hidden");
-    btn.textContent = "Afficher le tableau";
-  }
+  // Réinitialiser les champs
+  document.getElementById("adminPass").value = "";
 }
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+}
+
+function mettreAJourIndicateurs() {
+  const partiesUniques = [...new Set(donnees.map(d => d.partie))];
+  document.querySelectorAll(".step-indicator").forEach(el => el.classList.remove("has-data"));
+  partiesUniques.forEach(partie => {
+    const el = document.getElementById(`indicator-${partie}`);
+    if (el) el.classList.add("has-data");
+  });
+}
+  
 function showPartieData(partie) {
   const popupTitle = document.getElementById("popupTitle");
   const popupContent = document.getElementById("popupContent");
@@ -960,33 +935,6 @@ function closePopup() {
   document.getElementById("popupOverlay").classList.add("hidden");
 }
 
-function mettreAJourIndicateurs() {
-  const partiesUniques = [...new Set(donnees.map(d => d.partie))];
-
-  document.querySelectorAll(".step-indicator").forEach(el => {
-    el.classList.remove("has-data");
-  });
-
-  partiesUniques.forEach(partie => {
-    const id = `indicator-${partie}`;
-    const el = document.getElementById(id);
-    if (el) el.classList.add("has-data");
-  });
-}
-
-
-  function hideMessage(elementId) {
-    document.getElementById(elementId).style.display = "none";
-  }
-
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
@@ -1010,6 +958,29 @@ function mettreAJourIndicateurs() {
 
     XLSX.writeFile(workbook, "donnees_produit_JLC.xlsx");
   }
+</script>
+<!-- 📦 Librairies externes avec defer -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+<script defer>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Initialisation Supabase
+    const supabaseUrl = 'https://htdkfnrivusmgwwpirka.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZGtmbnJpdnVzbWd3d3BpcmthIiwicm9sZSI6InB1YmxpYyIsImlhdCI6MTY5NjgxMzI0NSwiZXhwIjoxOTEyMzg5MjQ1fQ.kR9nt0Y2MZcDf7-QPG5ZkXvEb7fQbI6OCr4D-Vg8HDo';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Test : vérifier que Supabase est bien connecté
+    const { data, error } = await supabase.from('ta_table').select('*');
+    if (error) {
+      console.error('Erreur Supabase :', error);
+    } else {
+      console.log('Données récupérées :', data);
+    }
+
+    // 👉 Le reste de ton code d’affichage, de chart, etc.
+  });
 </script>
 
 <div id="popupOverlay" class="popup-overlay hidden">
