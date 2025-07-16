@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plateforme Suivi Produit JLC</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f4f5 0%, #e8f5e8 100%);
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .popup {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .popup h3 {
+      color: #006400;
+      margin-top: 0;
+    }
+
+    .popup .close-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .popup .close-btn:hover {
+      color: #000;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .process-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2rem 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    
+    .secondary-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    
+    .flow-step {
+      min-width: 120px;
+      text-align: center;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      position: relative;
+    }
+    
+    .flow-step:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border-color: #006400;
+    }
+    
+    .flow-step.active {
+      border-color: #006400;
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+    }
+    
+    .flow-step.secondary {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+    
+    .step-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .step-title {
+      font-weight: 600;
+      color: #006400;
+      margin-bottom: 0.3rem;
+    }
+    
+    .step-subtitle {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    
+    .step-indicator {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+    
+    .step-indicator.has-data {
+      background: #28a745;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .flow-arrow {
+      font-size: 1.5rem;
+      color: #006400;
+      margin: 0 0.5rem;
+    }
+    
+    .partie-details {
+      margin: 2rem 0;
+      padding: 2rem;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .partie-details h4 {
+      color: #006400;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .details-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .detail-card {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #006400;
+    }
+    
+    .detail-card h5 {
+      margin: 0 0 0.5rem 0;
+      color: #006400;
+    }
+    
+    .detail-card p {
+      margin: 0;
+      color: #666;
+    }
+    
+    .table-container {
+      margin-top: 1rem;
+    }
+    
+    .table-container.hidden {
+      display: none;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+    
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      padding: 0 1rem;
+    }
+    
+    .login-box {
+      max-width: 400px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+
+    .login-type-selector {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-type-btn {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .login-type-btn.active {
+      border-color: #006400;
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+      color: #006400;
+      font-weight: 600;
+    }
+
+    .login-type-btn:hover {
+      border-color: #006400;
+    }
+    
+    .form-section, .admin-section {
+      width: 100%;
+      max-width: none;
+      margin: 2rem 0;
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .form-section h2, .admin-section h2, .login-box h2 {
+      color: #006400;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #006400;
+      padding-bottom: 0.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #006400;
+      box-shadow: 0 0 0 3px rgba(0,100,0,0.1);
+    }
+    
+    button {
+      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+      color: white;
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    th {
+      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    
+    tr:hover {
+      background-color: #e8f5e8;
+    }
+    
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #c3e6cb;
+      display: none;
+    }
+    
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #f5c6cb;
+      display: none;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #006400;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    
+    .logout-btn {
+      background: #dc3545;
+      margin-left: 1rem;
+    }
+    
+    .logout-btn:hover {
+      background: #c82333;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+    
+    .reset-btn {
+      background: #6c757d;
+    }
+    
+    .reset-btn:hover {
+      background: #5a6268;
+    }
+
+    /* Styles pour les graphiques */
+    .charts-section {
+      margin: 2rem 0;
+      padding: 2rem;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .chart-container {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+    }
+
+    .chart-title {
+      color: #006400;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .chart-canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+
+    .no-data-message {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 2rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 0.5rem;
+      }
+      
+      .login-box, .form-section, .admin-section {
+        margin: 1rem 0;
+        padding: 1rem;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 0.5rem;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Plateforme de Suivi Produit JLC</h1>
+</header>
+
+<div class="container">
+  <div class="login-box" id="loginBox">
+    <h2>Connexion</h2>
+    <div class="login-type-selector">
+      <div class="login-type-btn active" onclick="selectLoginType('user')">
+        <div>👤</div>
+        <div>Utilisateur</div>
+      </div>
+      <div class="login-type-btn" onclick="selectLoginType('admin')">
+        <div>🔐</div>
+        <div>Administrateur</div>
+      </div>
+    </div>
+    
+    <div class="error-message" id="loginError"></div>
+    
+    <div id="userLogin">
+      <div class="form-group">
+        <label for="userName">Nom d'utilisateur</label>
+        <input type="text" id="userName" placeholder="Saisissez votre nom">
+      </div>
+      <button onclick="userLogin()">Se connecter</button>
+    </div>
+
+    <div id="adminLogin" class="hidden">
+      <div class="form-group">
+        <label for="adminPass">Mot de passe administrateur</label>
+        <input type="password" id="adminPass" placeholder="Saisissez le mot de passe">
+      </div>
+      <button onclick="adminLogin()">Se connecter</button>
+    </div>
+  </div>
+
+  <div class="form-section hidden" id="dataForm">
+    <h2>Enregistrement des Données</h2>
+    <div class="success-message" id="successMessage"></div>
+    <div class="error-message" id="errorMessage"></div>
+    
+    <form id="productForm">
+      <div class="form-group">
+        <label for="stock">Stock *</label>
+        <select id="stock" required>
+          <option value="">Sélectionnez un stock</option>
+          <option value="Sidi Chennane Carreau">Sidi Chennane Carreau</option>
+          <option value="Park Elouafi">Park Elouafi</option>
+          <option value="Beni Idir">Beni Idir</option>
+          <option value="JPH">JPH</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="stockValue">Valeur Stock (K TSM) *</label>
+        <input type="number" id="stockValue" min="0" step="0.01" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="cd">Concentration Cd (mg/Kg) *</label>
+        <input type="number" id="cd" min="0" step="0.01" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="responsable">Responsable *</label>
+        <input type="text" id="responsable" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="date">Date *</label>
+        <input type="date" id="date" required>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="reset-btn" onclick="resetForm()">Réinitialiser</button>
+        <button type="submit">Valider</button>
+        <button type="button" class="logout-btn" onclick="logout()">Se déconnecter</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="admin-section hidden" id="adminSection">
+    <h2>Tableau de Bord Administrateur</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalEntries">0</div>
+        <div class="stat-label">Entrées totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avgCd">0</div>
+        <div class="stat-label">Cd moyen (mg/Kg)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalStock">0</div>
+        <div class="stat-label">Stock total (K TSM)</div>
+      </div>
+    </div>
+
+    <!-- Section des graphiques -->
+    <div class="charts-section">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Graphiques d'Évolution par Stock</h3>
+        <button class="logout-btn" onclick="logout()">Se déconnecter</button>
+      </div>
+      
+      <div class="charts-grid" id="chartsGrid">
+        <!-- Les graphiques seront générés dynamiquement ici -->
+      </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Cartographie des Stocks</h3>
+    </div>
+    
+    <div class="process-flow">
+      <div class="flow-step" data-stock="Sidi Chennane Carreau" onclick="showStockData('Sidi Chennane Carreau')">
+        <div class="step-icon">🏗️</div>
+        <div class="step-title">Sidi Chennane</div>
+        <div class="step-subtitle">Carreau</div>
+        <div class="step-indicator" id="indicator-Sidi Chennane Carreau"></div>
+      </div>
+      
+      <div class="flow-arrow">➤</div>
+      
+      <div class="flow-step" data-stock="Park Elouafi" onclick="showStockData('Park Elouafi')">
+        <div class="step-icon">🏞️</div>
+        <div class="step-title">Park</div>
+        <div class="step-subtitle">Elouafi</div>
+        <div class="step-indicator" id="indicator-Park Elouafi"></div>
+      </div>
+      
+      <div class="flow-arrow">➤</div>
+      
+      <div class="flow-step" data-stock="Beni Idir" onclick="showStockData('Beni Idir')">
+        <div class="step-icon">⛰️</div>
+        <div class="step-title">Beni</div>
+        <div class="step-subtitle">Idir</div>
+        <div class="step-indicator" id="indicator-Beni Idir"></div>
+      </div>
+      
+      <div class="flow-arrow">➤</div>
+      
+      <div class="flow-step" data-stock="JPH" onclick="showStockData('JPH')">
+        <div class="step-icon">🏭</div>
+        <div class="step-title">JPH</div>
+        <div class="step-subtitle">Unité</div>
+        <div class="step-indicator" id="indicator-JPH"></div>
+      </div>
+    </div>
+    
+    <div class="partie-details" id="stockDetails">
+      <h4 id="stockDetailsTitle">Sélectionnez un stock</h4>
+      <div class="details-content" id="stockDetailsContent">
+        <p>Cliquez sur un stock dans la cartographie pour voir les données associées.</p>
+      </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+      <h3>Toutes les Données</h3>
+      <button onclick="toggleTableView()" id="toggleTableBtn">Afficher le tableau</button>
+    </div>
+    
+    <div class="table-container hidden" id="tableContainer">
+      <table>
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Valeur (K TSM)</th>
+            <th>Cd (mg/Kg)</th>
+            <th>Responsable</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+      </table>
+    </div>
+    <button onclick="exporterExcel()">Exporter vers Excel</button>
+  </div>
+</div>
+
+<div id="popupOverlay" class="popup-overlay hidden">
+  <div class="popup">
+    <span class="close-btn" onclick="closePopup()">×</span>
+    <h3 id="popupTitle">Détails</h3>
+    <div id="popupContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// Variables globales
+let supabaseClient;
+let donnees = [];
+let chartInstances = {}; // Pour stocker toutes les instances de graphiques
+let currentLoginType = 'user';
+
+// Initialisation Supabase
+try {
+  supabaseClient = supabase.createClient(
+    'https://htdkfnrivusmgwwpirka.supabase.co', 
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZGtmbnJpdnVzbWd3d3BpcmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MTg5ODcsImV4cCI6MjA2Nzk5NDk4N30.et4RmPMAl6ovERF9drafjATikXGOVisZhNU2hNuh35I'
+  );
+} catch (error) {
+  console.error('Erreur initialisation Supabase:', error);
+}
+
+// Fonction d'initialisation complète
+  document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById('date').valueAsDate = new Date();
+
+  document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    enregistrerDonnees();
+  });
+
+  // Enter pour connexion
+  document.getElementById('adminPass').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') adminLogin();
+  });
+
+  document.getElementById('userName').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') userLogin();
+  });
+
+  // Fermer la popup en cliquant à l'extérieur
+  document.getElementById('popupOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closePopup();
+    }
+  });
+
+  // Gestion des touches clavier pour la popup
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closePopup();
+    }
+  });
+
+  // Chargement initial des données
+  await init();
+});
+
+// Fonction d'initialisation globale
+async function init() {
+  try {
+    donnees = await chargerDonneesDepuisSupabase();
+    updateStats();
+    renderAllCharts();
+    afficherTable();
+    mettreAJourIndicateurs();
+  } catch (error) {
+    console.error('Erreur lors de l\'initialisation:', error);
+  }
+}
+
+// Fonction de sélection du type de connexion
+function selectLoginType(type) {
+  currentLoginType = type;
+  const buttons = document.querySelectorAll('.login-type-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  if (type === 'user') {
+    buttons[0].classList.add('active');
+    document.getElementById('userLogin').classList.remove('hidden');
+    document.getElementById('adminLogin').classList.add('hidden');
+  } else {
+    buttons[1].classList.add('active');
+    document.getElementById('userLogin').classList.add('hidden');
+    document.getElementById('adminLogin').classList.remove('hidden');
+  }
+}
+
+// Connexion utilisateur
+function userLogin() {
+  const userName = document.getElementById('userName').value.trim();
+  if (!userName) {
+    showMessage("Veuillez saisir votre nom", "error", "loginError");
+    return;
+  }
+  
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("dataForm").classList.remove("hidden");
+  document.getElementById("responsable").value = userName;
+  hideMessage("loginError");
+}
+
+// Connexion administrateur
+async function adminLogin() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === "admin123") {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminSection").classList.remove("hidden");
+
+    await init(); // Chargement données, stats, charts
+
+    hideMessage("loginError");
+  } else {
+    showMessage("Mot de passe incorrect ❌", "error", "loginError");
+  }
+}
+
+// Enregistrement des données
+async function enregistrerDonnees() {
+  const stock = document.getElementById("stock").value;
+  const stockValue = parseFloat(document.getElementById("stockValue").value);
+  const cd = parseFloat(document.getElementById("cd").value);
+  const responsable = document.getElementById("responsable").value.trim();
+  const date = document.getElementById("date").value;
+
+  if (!stock || isNaN(stockValue) || isNaN(cd) || !responsable || !date) {
+    showMessage("❌ Champs manquants ou invalides", "error");
+    return;
+  }
+
+  const nouvelleDonnee = {
+    stock,
+    stockValue,
+    cd,
+    responsable,
+    date
+  };
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('donnees')
+      .insert([nouvelleDonnee]);
+
+    if (error) {
+      throw error;
+    }
+
+    showMessage("✅ Données enregistrées avec succès dans Supabase !", "success");
+    document.getElementById("productForm").reset();
+    document.getElementById("date").valueAsDate = new Date();
+    document.getElementById("responsable").value = document.getElementById("userName").value;
+    
+    // Actualiser les données
+    await init();
+    
+  } catch (error) {
+    showMessage("❌ Erreur lors de l'enregistrement dans Supabase", "error");
+    console.error('Erreur Supabase:', error);
+  }
+}
+
+// Réinitialiser le formulaire
+function resetForm() {
+  document.getElementById("productForm").reset();
+  document.getElementById('date').valueAsDate = new Date();
+  document.getElementById("responsable").value = document.getElementById("userName").value;
+ hideMessage("errorMessage");
+}
+
+// Déconnexion
+function logout() {
+ document.getElementById("loginBox").classList.remove("hidden");
+ document.getElementById("dataForm").classList.add("hidden");
+ document.getElementById("adminSection").classList.add("hidden");
+ document.getElementById("userName").value = "";
+ document.getElementById("adminPass").value = "";
+ hideMessage("loginError");
+ hideMessage("errorMessage");
+ hideMessage("successMessage");
+ resetForm();
+}
+
+// Charger les données depuis Supabase
+async function chargerDonneesDepuisSupabase() {
+ try {
+   const { data, error } = await supabaseClient
+     .from('donnees')
+     .select('*')
+     .order('date', { ascending: false });
+
+   if (error) {
+     throw error;
+   }
+
+   return data || [];
+ } catch (error) {
+   console.error('Erreur lors du chargement des données:', error);
+   return [];
+ }
+}
+
+// Afficher les messages
+function showMessage(message, type, elementId = null) {
+ const messageElement = document.getElementById(elementId || (type === "error" ? "errorMessage" : "successMessage"));
+ messageElement.textContent = message;
+ messageElement.style.display = "block";
+ 
+ setTimeout(() => {
+   messageElement.style.display = "none";
+ }, 3000);
+}
+
+// Cacher les messages
+function hideMessage(elementId) {
+ const element = document.getElementById(elementId);
+ if (element) {
+   element.style.display = "none";
+ }
+}
+
+// Mettre à jour les statistiques
+function updateStats() {
+ const totalEntries = donnees.length;
+ const avgCd = totalEntries > 0 ? (donnees.reduce((sum, item) => sum + item.cd, 0) / totalEntries).toFixed(2) : 0;
+ const totalStock = donnees.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
+
+ document.getElementById("totalEntries").textContent = totalEntries;
+ document.getElementById("avgCd").textContent = avgCd;
+ document.getElementById("totalStock").textContent = totalStock;
+}
+
+// Afficher le tableau
+function afficherTable() {
+ const tableBody = document.getElementById("dataTable");
+ tableBody.innerHTML = "";
+
+ donnees.forEach(item => {
+   const row = tableBody.insertRow();
+   row.insertCell(0).textContent = item.stock;
+   row.insertCell(1).textContent = item.stockValue;
+   row.insertCell(2).textContent = item.cd;
+   row.insertCell(3).textContent = item.responsable;
+   row.insertCell(4).textContent = new Date(item.date).toLocaleDateString('fr-FR');
+ });
+}
+
+// Basculer l'affichage du tableau
+function toggleTableView() {
+ const tableContainer = document.getElementById("tableContainer");
+ const toggleBtn = document.getElementById("toggleTableBtn");
+ 
+ if (tableContainer.classList.contains("hidden")) {
+   tableContainer.classList.remove("hidden");
+   toggleBtn.textContent = "Masquer le tableau";
+ } else {
+   tableContainer.classList.add("hidden");
+   toggleBtn.textContent = "Afficher le tableau";
+ }
+}
+
+// Mettre à jour les indicateurs
+function mettreAJourIndicateurs() {
+ const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
+ 
+ stocks.forEach(stock => {
+   const indicator = document.getElementById(`indicator-${stock}`);
+   const hasData = donnees.some(item => item.stock === stock);
+   
+   if (hasData) {
+     indicator.classList.add('has-data');
+   } else {
+     indicator.classList.remove('has-data');
+   }
+ });
+}
+
+// Afficher les données d'un stock
+function showStockData(stockName) {
+ const stockData = donnees.filter(item => item.stock === stockName);
+ 
+ // Mettre à jour l'état actif
+ document.querySelectorAll('.flow-step').forEach(step => {
+   step.classList.remove('active');
+ });
+ document.querySelector(`[data-stock="${stockName}"]`).classList.add('active');
+ 
+ // Afficher les détails
+ const title = document.getElementById('stockDetailsTitle');
+ const content = document.getElementById('stockDetailsContent');
+ 
+ title.textContent = `Stock: ${stockName}`;
+ 
+ if (stockData.length === 0) {
+   content.innerHTML = '<p class="no-data-message">Aucune donnée disponible pour ce stock.</p>';
+   return;
+ }
+ 
+ // Calculer les statistiques
+ const totalEntries = stockData.length;
+ const avgCd = (stockData.reduce((sum, item) => sum + item.cd, 0) / totalEntries).toFixed(2);
+ const totalStockValue = stockData.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
+ const lastEntry = stockData[0]; // Données triées par date desc
+ 
+ content.innerHTML = `
+   <div class="detail-card">
+     <h5>Nombre d'entrées</h5>
+     <p>${totalEntries}</p>
+   </div>
+   <div class="detail-card">
+     <h5>Cd moyen</h5>
+     <p>${avgCd} mg/Kg</p>
+   </div>
+   <div class="detail-card">
+     <h5>Valeur totale</h5>
+     <p>${totalStockValue} K TSM</p>
+   </div>
+   <div class="detail-card">
+     <h5>Dernière entrée</h5>
+     <p>${new Date(lastEntry.date).toLocaleDateString('fr-FR')}</p>
+   </div>
+   <div class="detail-card">
+     <h5>Dernier responsable</h5>
+     <p>${lastEntry.responsable}</p>
+   </div>
+   <div class="detail-card">
+     <h5>Dernier Cd</h5>
+     <p>${lastEntry.cd} mg/Kg</p>
+   </div>
+ `;
+}
+
+// Rendu de tous les graphiques
+function renderAllCharts() {
+ const chartsGrid = document.getElementById('chartsGrid');
+ chartsGrid.innerHTML = '';
+ 
+ // Détruire les anciens graphiques
+ Object.values(chartInstances).forEach(chart => {
+   if (chart) chart.destroy();
+ });
+ chartInstances = {};
+ 
+ const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
+ 
+ stocks.forEach(stock => {
+   const stockData = donnees.filter(item => item.stock === stock);
+   
+   if (stockData.length > 0) {
+     createStockChart(stock, stockData);
+   }
+ });
+}
+
+// Créer un graphique pour un stock
+function createStockChart(stockName, stockData) {
+ const chartsGrid = document.getElementById('chartsGrid');
+ 
+ // Créer le conteneur
+ const chartContainer = document.createElement('div');
+ chartContainer.className = 'chart-container';
+ chartContainer.innerHTML = `
+  <div class="chart-title">${stockName}</div>
+  <div style="display: flex; gap: 1rem;">
+    <div style="flex: 1;">
+      <h5 style="text-align:center;color:#dc3545">Cd (mg/Kg)</h5>
+      <canvas class="chart-canvas" id="chart-cd-${stockName.replace(/\s+/g, '-')}"></canvas>
+    </div>
+    <div style="flex: 1;">
+      <h5 style="text-align:center;color:#006400">Stock (K TSM)</h5>
+      <canvas class="chart-canvas" id="chart-stock-${stockName.replace(/\s+/g, '-')}"></canvas>
+    </div>
+  </div>
+`;
+ 
+ chartsGrid.appendChild(chartContainer);
+ 
+ // Préparer les données triées par date
+ const sortedData = stockData.sort((a, b) => new Date(a.date) - new Date(b.date));
+ 
+ const labels = sortedData.map(item => new Date(item.date).toLocaleDateString('fr-FR'));
+ const cdValues = sortedData.map(item => parseFloat(item.cd));
+ const stockValues = sortedData.map(item => parseFloat(item.stockValue));
+
+ 
+ // Créer le graphique
+const cdCtx = document.getElementById(`chart-cd-${stockName.replace(/\s+/g, '-')}`).getContext('2d');
+const stockCtx = document.getElementById(`chart-stock-${stockName.replace(/\s+/g, '-')}`).getContext('2d');
+
+chartInstances[`${stockName}-cd`] = new Chart(cdCtx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Cd (mg/Kg)',
+      data: cdValues,
+      borderColor: '#dc3545',
+      backgroundColor: 'rgba(220, 53, 69, 0.1)',
+      tension: 0.1,
+      pointRadius: 4,
+      pointBackgroundColor: '#dc3545',
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        title: { display: true, text: 'Cd (mg/Kg)', color: '#dc3545' },
+        ticks: { color: '#dc3545' }
+      }
+    },
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: { mode: 'index', intersect: false }
+    }
+  }
+});
+
+chartInstances[`${stockName}-stock`] = new Chart(stockCtx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Stock (K TSM)',
+      data: stockValues,
+      borderColor: '#006400',
+      backgroundColor: 'rgba(0, 100, 0, 0.1)',
+      tension: 0.1,
+      pointRadius: 4,
+      pointBackgroundColor: '#006400',
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        title: { display: true, text: 'Stock (K TSM)', color: '#006400' },
+        ticks: { color: '#006400' }
+      }
+    },
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: { mode: 'index', intersect: false }
+    }
+  }
+});
+}
+// Fermer la popup
+function closePopup() {
+ document.getElementById('popupOverlay').classList.add('hidden');
+}
+
+// Exporter vers Excel
+function exporterExcel() {
+ if (donnees.length === 0) {
+   showMessage("Aucune donnée à exporter", "error");
+   return;
+ }
+
+ const ws = XLSX.utils.json_to_sheet(donnees.map(item => ({
+   'Stock': item.stock,
+   'Valeur (K TSM)': item.stockValue,
+   'Cd (mg/Kg)': item.cd,
+   'Responsable': item.responsable,
+   'Date': new Date(item.date).toLocaleDateString('fr-FR')
+ })));
+
+ const wb = XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb, ws, "Données JLC");
+
+ const filename = `donnees_jlc_${new Date().toISOString().split('T')[0]}.xlsx`;
+ XLSX.writeFile(wb, filename);
+ 
+ showMessage("✅ Données exportées avec succès!", "success");
+}
+</script>
+
+</body>
+</html>
