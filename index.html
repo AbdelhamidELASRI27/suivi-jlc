@@ -18,28 +18,6 @@
       width: 100vw;
       overflow-x: hidden;
     }
-    
-  body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url('https://i.ibb.co/DP4x18hm/OCP-STAGE-1-2304-0.jpg') no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100vh;
-  width: 100vw;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* Optionnel : Ajouter un overlay pour améliorer la lisibilité */
-    body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.2); /* Overlay blanc semi-transparent */
-  z-index: -1;
-}
 
     .popup-overlay {
       position: fixed;
@@ -243,11 +221,6 @@
       margin: 0;
       font-size: 2rem;
       font-weight: 600;
-    }
-    
-    .chart-canvas {
-     width: 100% !important;
-     height: auto !important;
     }
     
     .container {
@@ -568,11 +541,25 @@
     <div class="error-message" id="loginError"></div>
     
     <div id="userLogin">
-      <div class="form-group">
-        <label for="userName">Nom d'utilisateur</label>
-        <input type="text" id="userName" placeholder="Saisissez votre nom">
+      <div id="loginForm">
+        <div class="form-group">
+          <label for="userEmail">Email</label>
+          <input type="email" id="userEmail" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="userPassword">Mot de passe</label>
+          <input type="password" id="userPassword" placeholder="Mot de passe" required>
+        </div>
+        <div class="form-group">
+          <label for="userFullName">Nom complet</label>
+          <input type="text" id="userFullName" placeholder="Votre nom complet" required>
+        </div>
+        <button type="button" id="authSubmitBtn" onclick="handleAuth()">Se connecter</button>
+        <p style="text-align: center; margin-top: 1rem;">
+          <span id="authToggleText">Pas de compte ?</span>
+          <a href="#" onclick="toggleAuthMode()" style="color: #006400;">Créer un compte</a>
+        </p>
       </div>
-      <button onclick="userLogin()">Se connecter</button>
     </div>
 
     <div id="adminLogin" class="hidden">
@@ -743,6 +730,8 @@
 
 <script>
 // Variables globales
+let currentUser = null;
+let isRegistering = false; // Commencer en mode connexion
 let supabaseClient;
 let donnees = [];
 let chartInstances = {}; // Pour stocker toutes les instances de graphiques
@@ -759,7 +748,7 @@ try {
 }
 
 // Fonction d'initialisation complète
-  document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById('date').valueAsDate = new Date();
 
   document.getElementById('productForm').addEventListener('submit', function(e) {
@@ -767,13 +756,20 @@ try {
     enregistrerDonnees();
   });
 
+  // Initialiser le formulaire en mode connexion par défaut
+  initializeAuthForm();
+  
   // Enter pour connexion
   document.getElementById('adminPass').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') adminLogin();
   });
 
-  document.getElementById('userName').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') userLogin();
+  document.getElementById('userEmail').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') handleAuth();
+  });
+
+  document.getElementById('userPassword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') handleAuth();
   });
 
   // Fermer la popup en cliquant à l'extérieur
@@ -794,304 +790,387 @@ try {
   await init();
 });
 
+// Fonction pour initialiser le formulaire d'authentification
+function initializeAuthForm() {
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const toggleText = document.getElementById('authToggleText');
+  const nameField = document.getElementById('userFullName');
+  
+  // Mode connexion par défaut
+  submitBtn.textContent = 'Se connecter';
+  toggleText.textContent = 'Pas de compte ?';
+  nameField.style.display = 'none';
+  nameField.required = false;
+  isRegistering = false;
+}
+
 // Fonction d'initialisation globale
 async function init() {
+  // Vérifier l'authentification
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  currentUser = user;
   try {
     donnees = await chargerDonneesDepuisSupabase();
     updateStats();
     renderAllCharts();
-    afficherTable();
-    mettreAJourIndicateurs();
+    updateFlowIndicators();
+    remplirTableau();
   } catch (error) {
-    console.error('Erreur lors de l\'initialisation:', error);
+    console.error('Erreur lors du chargement des données:', error);
   }
 }
 
-// Fonction de sélection du type de connexion
+// Fonction pour sélectionner le type de connexion
 function selectLoginType(type) {
   currentLoginType = type;
-  const buttons = document.querySelectorAll('.login-type-btn');
-  buttons.forEach(btn => btn.classList.remove('active'));
-
+  
+  // Mise à jour des boutons
+  document.querySelectorAll('.login-type-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
   if (type === 'user') {
-    buttons[0].classList.add('active');
-    document.getElementById('userLogin').classList.remove('hidden');
-    document.getElementById('adminLogin').classList.add('hidden');
+    document.querySelector('.login-type-btn').classList.add('active');
+    document.getElementById('userLogin').style.display = 'block';
+    document.getElementById('adminLogin').style.display = 'none';
   } else {
-    buttons[1].classList.add('active');
-    document.getElementById('userLogin').classList.add('hidden');
-    document.getElementById('adminLogin').classList.remove('hidden');
+    document.querySelectorAll('.login-type-btn')[1].classList.add('active');
+    document.getElementById('userLogin').style.display = 'none';
+    document.getElementById('adminLogin').style.display = 'block';
   }
 }
 
-// Connexion utilisateur
-function userLogin() {
-  const userName = document.getElementById('userName').value.trim();
-  if (!userName) {
-    showMessage("Veuillez saisir votre nom", "error", "loginError");
+// Fonction pour basculer entre connexion et inscription
+function toggleAuthMode() {
+  isRegistering = !isRegistering;
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const toggleText = document.getElementById('authToggleText');
+  const nameField = document.getElementById('userFullName');
+  
+  if (isRegistering) {
+    submitBtn.textContent = 'Créer un compte';
+    toggleText.textContent = 'Déjà un compte ?';
+    nameField.style.display = 'block';
+    nameField.required = true;
+  } else {
+    submitBtn.textContent = 'Se connecter';
+    toggleText.textContent = 'Pas de compte ?';
+    nameField.style.display = 'none';
+    nameField.required = false;
+  }
+}
+
+// Fonction pour gérer l'authentification (connexion/inscription)
+async function handleAuth() {
+  const email = document.getElementById('userEmail').value;
+  const password = document.getElementById('userPassword').value;
+  const fullName = document.getElementById('userFullName').value;
+  
+  if (!email || !password || (isRegistering && !fullName)) {
+    showError('Veuillez remplir tous les champs obligatoires');
     return;
   }
   
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("dataForm").classList.remove("hidden");
-  document.getElementById("responsable").value = userName;
-  hideMessage("loginError");
+  try {
+    if (isRegistering) {
+      // Inscription
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      showSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre compte.');
+      
+      // Basculer vers le mode connexion
+      toggleAuthMode();
+      
+    } else {
+      // Connexion
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) throw error;
+      
+      currentUser = data.user;
+      document.getElementById('loginBox').classList.add('hidden');
+      document.getElementById('dataForm').classList.remove('hidden');
+      
+      showSuccess('Connexion réussie !');
+    }
+  } catch (error) {
+    console.error('Erreur authentification:', error);
+    showError(error.message || 'Erreur lors de l\'authentification');
+  }
 }
 
-// Connexion administrateur
+// Fonction pour la connexion administrateur
 async function adminLogin() {
-  const pass = document.getElementById("adminPass").value;
-  if (pass === "admin123") {
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("adminSection").classList.remove("hidden");
-
-    await init(); // Chargement données, stats, charts
-
-    hideMessage("loginError");
+  const password = document.getElementById('adminPass').value;
+  
+  if (password === 'admin123') {
+    document.getElementById('loginBox').classList.add('hidden');
+    document.getElementById('adminSection').classList.remove('hidden');
+    
+    // Chargement des données admin
+    await init();
+    
+    showSuccess('Connexion administrateur réussie !');
   } else {
-    showMessage("Mot de passe incorrect ❌", "error", "loginError");
+    showError('Mot de passe administrateur incorrect');
   }
 }
 
-// Enregistrement des données
-async function enregistrerDonnees() {
-  const stock = document.getElementById("stock").value;
-  const stockValue = parseFloat(document.getElementById("stockValue").value);
-  const cd = parseFloat(document.getElementById("cd").value);
-  const responsable = document.getElementById("responsable").value.trim();
-  const date = document.getElementById("date").value;
-
-  if (!stock || isNaN(stockValue) || isNaN(cd) || !responsable || !date) {
-    showMessage("❌ Champs manquants ou invalides", "error");
-    return;
-  }
-
-  const nouvelleDonnee = {
-    stock,
-    stockValue,
-    cd,
-    responsable,
-    date
-  };
-
+// Fonction pour charger les données depuis Supabase
+async function chargerDonneesDepuisSupabase() {
   try {
     const { data, error } = await supabaseClient
       .from('donnees')
-      .insert([nouvelleDonnee]);
-
-    if (error) {
-      throw error;
-    }
-
-    showMessage("✅ Données enregistrées avec succès dans Supabase !", "success");
-    document.getElementById("productForm").reset();
-    document.getElementById("date").valueAsDate = new Date();
-    document.getElementById("responsable").value = document.getElementById("userName").value;
+      .select('*')
+      .order('date', { ascending: false });
     
-    // Actualiser les données
-    await init();
+    if (error) throw error;
     
+    return data || [];
   } catch (error) {
-    showMessage("❌ Erreur lors de l'enregistrement dans Supabase", "error");
-    console.error('Erreur Supabase:', error);
+    console.error('Erreur lors du chargement des données:', error);
+    return [];
   }
 }
 
-// Réinitialiser le formulaire
+// Fonction pour enregistrer les données
+async function enregistrerDonnees() {
+  const stock = document.getElementById('stock').value;
+  const stockValue = parseFloat(document.getElementById('stockValue').value);
+  const cd = parseFloat(document.getElementById('cd').value);
+  const responsable = document.getElementById('responsable').value;
+  const date = document.getElementById('date').value;
+  
+  if (!stock || !stockValue || !cd || !responsable || !date) {
+    showError('Veuillez remplir tous les champs obligatoires');
+    return;
+  }
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('donnees')
+      .insert([
+        {
+          stock: stock,
+          stockValue: stockValue,
+          cd: cd,
+          responsable: responsable,
+          date: date,
+        }
+      ]);
+    
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      throw new Error(error.message || 'Erreur inconnue');
+    }
+    
+    showSuccess('Données enregistrées avec succès !');
+    resetForm();
+    
+    // Recharger les données
+    donnees = await chargerDonneesDepuisSupabase();
+    
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement:', error);
+    showError(`Erreur lors de l'enregistrement: ${error.message || 'Erreur inconnue'}`);
+  }
+}
+// Fonction pour réinitialiser le formulaire
 function resetForm() {
-  document.getElementById("productForm").reset();
+  document.getElementById('productForm').reset();
   document.getElementById('date').valueAsDate = new Date();
-  document.getElementById("responsable").value = document.getElementById("userName").value;
- hideMessage("errorMessage");
 }
 
-// Déconnexion
-function logout() {
- document.getElementById("loginBox").classList.remove("hidden");
- document.getElementById("dataForm").classList.add("hidden");
- document.getElementById("adminSection").classList.add("hidden");
- document.getElementById("userName").value = "";
- document.getElementById("adminPass").value = "";
- hideMessage("loginError");
- hideMessage("errorMessage");
- hideMessage("successMessage");
- resetForm();
+// Fonction pour afficher un message de succès
+function showSuccess(message) {
+  const successDiv = document.getElementById('successMessage');
+  successDiv.textContent = message;
+  successDiv.style.display = 'block';
+  
+  setTimeout(() => {
+    successDiv.style.display = 'none';
+  }, 5000);
 }
 
-// Charger les données depuis Supabase
-async function chargerDonneesDepuisSupabase() {
- try {
-   const { data, error } = await supabaseClient
-     .from('donnees')
-     .select('*')
-     .order('date', { ascending: false });
-
-   if (error) {
-     throw error;
-   }
-
-   return data || [];
- } catch (error) {
-   console.error('Erreur lors du chargement des données:', error);
-   return [];
- }
+// Fonction pour afficher un message d'erreur
+function showError(message) {
+  const errorDiv = document.getElementById('errorMessage') || document.getElementById('loginError');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+  
+  setTimeout(() => {
+    errorDiv.style.display = 'none';
+  }, 5000);
 }
 
-// Afficher les messages
-function showMessage(message, type, elementId = null) {
- const messageElement = document.getElementById(elementId || (type === "error" ? "errorMessage" : "successMessage"));
- messageElement.textContent = message;
- messageElement.style.display = "block";
- 
- setTimeout(() => {
-   messageElement.style.display = "none";
- }, 3000);
+// Fonction pour se déconnecter
+async function logout() {
+  try {
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    
+    // Réinitialiser l'interface
+    document.getElementById('loginBox').classList.remove('hidden');
+    document.getElementById('dataForm').classList.add('hidden');
+    document.getElementById('adminSection').classList.add('hidden');
+    
+    // Réinitialiser les champs
+    document.getElementById('userEmail').value = '';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userFullName').value = '';
+    document.getElementById('adminPass').value = '';
+    
+    // Réinitialiser le mode de connexion
+    selectLoginType('user');
+    initializeAuthForm();
+    
+    showSuccess('Déconnexion réussie !');
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error);
+  }
 }
 
-// Cacher les messages
-function hideMessage(elementId) {
- const element = document.getElementById(elementId);
- if (element) {
-   element.style.display = "none";
- }
-}
-
-// Mettre à jour les statistiques
+// Fonction pour mettre à jour les statistiques
 function updateStats() {
- const totalEntries = donnees.length;
- const avgCd = totalEntries > 0 ? (donnees.reduce((sum, item) => sum + item.cd, 0) / totalEntries).toFixed(2) : 0;
- const totalStock = donnees.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
-
- document.getElementById("totalEntries").textContent = totalEntries;
- document.getElementById("avgCd").textContent = avgCd;
- document.getElementById("totalStock").textContent = totalStock;
+  const totalEntries = donnees.length;
+  const avgCd = donnees.length > 0 ? (donnees.reduce((sum, item) => sum + item.cd, 0) / donnees.length).toFixed(2) : 0;
+  const totalStock = donnees.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
+  
+  document.getElementById('totalEntries').textContent = totalEntries;
+  document.getElementById('avgCd').textContent = avgCd;
+  document.getElementById('totalStock').textContent = totalStock;
 }
 
-// Afficher le tableau
-function afficherTable() {
- const tableBody = document.getElementById("dataTable");
- tableBody.innerHTML = "";
-
- donnees.forEach(item => {
-   const row = tableBody.insertRow();
-   row.insertCell(0).textContent = item.stock;
-   row.insertCell(1).textContent = item.stockValue;
-   row.insertCell(2).textContent = item.cd;
-   row.insertCell(3).textContent = item.responsable;
-   row.insertCell(4).textContent = new Date(item.date).toLocaleDateString('fr-FR');
- });
+// Fonction pour mettre à jour les indicateurs de flux
+function updateFlowIndicators() {
+  const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
+  
+  stocks.forEach(stockName => {
+    const indicator = document.getElementById(`indicator-${stockName}`);
+    const hasData = donnees.some(item => item.stock === stockName);
+    
+    if (hasData) {
+      indicator.classList.add('has-data');
+    } else {
+      indicator.classList.remove('has-data');
+    }
+  });
 }
 
-// Basculer l'affichage du tableau
-function toggleTableView() {
- const tableContainer = document.getElementById("tableContainer");
- const toggleBtn = document.getElementById("toggleTableBtn");
- 
- if (tableContainer.classList.contains("hidden")) {
-   tableContainer.classList.remove("hidden");
-   toggleBtn.textContent = "Masquer le tableau";
- } else {
-   tableContainer.classList.add("hidden");
-   toggleBtn.textContent = "Afficher le tableau";
- }
-}
-
-// Mettre à jour les indicateurs
-function mettreAJourIndicateurs() {
- const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
- 
- stocks.forEach(stock => {
-   const indicator = document.getElementById(`indicator-${stock}`);
-   const hasData = donnees.some(item => item.stock === stock);
-   
-   if (hasData) {
-     indicator.classList.add('has-data');
-   } else {
-     indicator.classList.remove('has-data');
-   }
- });
-}
-
-// Afficher les données d'un stock
+// Fonction pour afficher les données d'un stock
 function showStockData(stockName) {
- const stockData = donnees.filter(item => item.stock === stockName);
- 
- // Mettre à jour l'état actif
- document.querySelectorAll('.flow-step').forEach(step => {
-   step.classList.remove('active');
- });
- document.querySelector(`[data-stock="${stockName}"]`).classList.add('active');
- 
- // Afficher les détails
- const title = document.getElementById('stockDetailsTitle');
- const content = document.getElementById('stockDetailsContent');
- 
- title.textContent = `Stock: ${stockName}`;
- 
- if (stockData.length === 0) {
-   content.innerHTML = '<p class="no-data-message">Aucune donnée disponible pour ce stock.</p>';
-   return;
- }
- 
- // Calculer les statistiques
- const totalEntries = stockData.length;
- const avgCd = (stockData.reduce((sum, item) => sum + item.cd, 0) / totalEntries).toFixed(2);
- const totalStockValue = stockData.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
- const lastEntry = stockData[0]; // Données triées par date desc
- 
- content.innerHTML = `
-   <div class="detail-card">
-     <h5>Nombre d'entrées</h5>
-     <p>${totalEntries}</p>
-   </div>
-   <div class="detail-card">
-     <h5>Cd moyen</h5>
-     <p>${avgCd} mg/Kg</p>
-   </div>
-   <div class="detail-card">
-     <h5>Valeur totale</h5>
-     <p>${totalStockValue} K TSM</p>
-   </div>
-   <div class="detail-card">
-     <h5>Dernière entrée</h5>
-     <p>${new Date(lastEntry.date).toLocaleDateString('fr-FR')}</p>
-   </div>
-   <div class="detail-card">
-     <h5>Dernier responsable</h5>
-     <p>${lastEntry.responsable}</p>
-   </div>
-   <div class="detail-card">
-     <h5>Dernier Cd</h5>
-     <p>${lastEntry.cd} mg/Kg</p>
-   </div>
- `;
+  const stockData = donnees.filter(item => item.stock === stockName);
+  
+  // Mettre à jour le titre
+  document.getElementById('stockDetailsTitle').textContent = `Données pour ${stockName}`;
+  
+  // Effacer les anciennes données
+  document.querySelectorAll('.flow-step').forEach(step => {
+    step.classList.remove('active');
+  });
+  
+  // Marquer l'étape active
+  document.querySelector(`[data-stock="${stockName}"]`).classList.add('active');
+  
+  if (stockData.length > 0) {
+    const latestData = stockData[0]; // Données les plus récentes
+    const totalValue = stockData.reduce((sum, item) => sum + item.stockValue, 0);
+    const avgCd = stockData.reduce((sum, item) => sum + item.cd, 0) / stockData.length;
+    
+    document.getElementById('stockDetailsContent').innerHTML = `
+      <div class="detail-card">
+        <h5>Dernière mise à jour</h5>
+        <p>${new Date(latestData.date).toLocaleDateString('fr-FR')}</p>
+      </div>
+      <div class="detail-card">
+        <h5>Valeur totale</h5>
+        <p>${totalValue.toFixed(2)} K TSM</p>
+      </div>
+      <div class="detail-card">
+        <h5>Cd moyen</h5>
+        <p>${avgCd.toFixed(2)} mg/Kg</p>
+      </div>
+      <div class="detail-card">
+        <h5>Nombre d'entrées</h5>
+        <p>${stockData.length}</p>
+      </div>
+      <div class="detail-card">
+        <h5>Dernier responsable</h5>
+        <p>${latestData.responsable}</p>
+      </div>
+    `;
+  } else {
+    document.getElementById('stockDetailsContent').innerHTML = `
+      <div class="no-data-message">
+        Aucune donnée disponible pour ce stock.
+      </div>
+    `;
+  }
 }
 
-// Rendu de tous les graphiques
+// Fonction pour remplir le tableau
+function remplirTableau() {
+  const tableBody = document.getElementById('dataTable');
+  tableBody.innerHTML = '';
+  
+  donnees.forEach(item => {
+    const row = tableBody.insertRow();
+    row.insertCell(0).textContent = item.stock;
+    row.insertCell(1).textContent = item.stockValue;
+    row.insertCell(2).textContent = item.cd;
+    row.insertCell(3).textContent = item.responsable;
+    row.insertCell(4).textContent = new Date(item.date).toLocaleDateString('fr-FR');
+  });
+}
+
+// Fonction pour basculer l'affichage du tableau
+function toggleTableView() {
+  const tableContainer = document.getElementById('tableContainer');
+  const toggleBtn = document.getElementById('toggleTableBtn');
+  
+  if (tableContainer.classList.contains('hidden')) {
+    tableContainer.classList.remove('hidden');
+    toggleBtn.textContent = 'Masquer le tableau';
+  } else {
+    tableContainer.classList.add('hidden');
+    toggleBtn.textContent = 'Afficher le tableau';
+  }
+}
+
+// Fonction pour générer tous les graphiques
 function renderAllCharts() {
- const chartsGrid = document.getElementById('chartsGrid');
- chartsGrid.innerHTML = '';
- 
- // Détruire les anciens graphiques
- Object.values(chartInstances).forEach(chart => {
-   if (chart) chart.destroy();
- });
- chartInstances = {};
- 
- const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
- 
- stocks.forEach(stock => {
-   const stockData = donnees.filter(item => item.stock === stock);
-   
-   if (stockData.length > 0) {
-     createStockChart(stock, stockData);
-   }
- });
+  const chartsGrid = document.getElementById('chartsGrid');
+  chartsGrid.innerHTML = '';
+  
+  const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
+  
+  stocks.forEach(stockName => {
+    const stockData = donnees.filter(item => item.stock === stockName);
+    
+    if (stockData.length > 0) {
+      
+      // Générer le graphique
+      generateChart(stockName, stockData);
+    }
+  });
 }
 
-// Créer un graphique pour un stock
-function createStockChart(stockName, stockData) {
- const chartsGrid = document.getElementById('chartsGrid');
+// Fonction pour générer un graphique spécifique
+function generateChart(stockName, stockData) {
+  const chartsGrid = document.getElementById('chartsGrid');
  
  // Créer le conteneur
  const chartContainer = document.createElement('div');
@@ -1186,34 +1265,48 @@ chartInstances[`${stockName}-stock`] = new Chart(stockCtx, {
   }
 });
 }
-// Fermer la popup
-function closePopup() {
- document.getElementById('popupOverlay').classList.add('hidden');
-}
-
-// Exporter vers Excel
+// Fonction pour exporter vers Excel
 function exporterExcel() {
- if (donnees.length === 0) {
-   showMessage("Aucune donnée à exporter", "error");
-   return;
- }
-
- const ws = XLSX.utils.json_to_sheet(donnees.map(item => ({
-   'Stock': item.stock,
-   'Valeur (K TSM)': item.stockValue,
-   'Cd (mg/Kg)': item.cd,
-   'Responsable': item.responsable,
-   'Date': new Date(item.date).toLocaleDateString('fr-FR')
- })));
-
- const wb = XLSX.utils.book_new();
- XLSX.utils.book_append_sheet(wb, ws, "Données JLC");
-
- const filename = `donnees_jlc_${new Date().toISOString().split('T')[0]}.xlsx`;
- XLSX.writeFile(wb, filename);
- 
- showMessage("✅ Données exportées avec succès!", "success");
+  if (donnees.length === 0) {
+    showError('Aucune donnée à exporter');
+    return;
+  }
+  
+  // Préparer les données pour l'export
+  const dataForExport = donnees.map(item => ({
+    'Stock': item.stock,
+    'Valeur Stock (K TSM)': item.stockValue,
+    'Concentration Cd (mg/Kg)': item.cd,
+    'Responsable': item.responsable,
+    'Date': new Date(item.date).toLocaleDateString('fr-FR')
+  }));
+  
+  // Créer le workbook
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(dataForExport);
+  
+  // Ajouter la feuille au workbook
+  XLSX.utils.book_append_sheet(wb, ws, 'Données Produit');
+  
+  // Générer le fichier Excel
+  const fileName = `donnees_produit_${new Date().toISOString().split('T')[0]}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  
+  showSuccess('Export Excel réussi !');
 }
+
+// Fonction pour fermer la popup
+function closePopup() {
+  document.getElementById('popupOverlay').classList.add('hidden');
+}
+
+// Fonction pour afficher la popup
+function showPopup(title, content) {
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupContent').innerHTML = content;
+  document.getElementById('popupOverlay').classList.remove('hidden');
+}
+
 </script>
 
 </body>
