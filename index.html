@@ -1,25 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plateforme Suivi Produit JLC</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme de Suivi Produit JLC</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+/* Reset et base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f0f4f5 0%, #e8f5e8 100%);
-      min-height: 100vh;
-      width: 100vw;
-      overflow-x: hidden;
-    }
-    
-  body {
+body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: url('https://i.ibb.co/DP4x18hm/OCP-STAGE-1-2304-0.jpg') no-repeat center center fixed;
   background-size: cover;
@@ -29,517 +23,801 @@
   position: relative;
 }
 
-/* Optionnel : Ajouter un overlay pour améliorer la lisibilité */
-    body::before {
+/* Overlay pour améliorer la lisibilité */
+body::before {
   content: '';
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.2); /* Overlay blanc semi-transparent */
+  background: rgba(0, 0, 0, 0.2);
   z-index: -1;
 }
 
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
+/* Header */
+header {
+  background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
 
-    .popup {
-      background: white;
-      padding: 2rem;
-      border-radius: 15px;
-      max-width: 600px;
-      width: 90%;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-      position: relative;
-      animation: fadeIn 0.3s ease;
-    }
+header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
 
+/* Container principal */
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .popup h3 {
-      color: #006400;
-      margin-top: 0;
-    }
+/* Conteneurs principaux */
+.login-container, .login-box, .form-section, .admin-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  overflow: hidden;
+  width: 100%;
+  max-width: 450px;
+  border: 1px solid rgba(255,255,255,0.2);
+  margin: 2rem auto;
+  padding: 2rem;
+}
 
-    .popup .close-btn {
-      position: absolute;
-      top: 0.5rem;
-      right: 1rem;
-      font-size: 1.5rem;
-      color: #aaa;
-      cursor: pointer;
-    }
+.form-section, .admin-section {
+  max-width: none;
+  margin: 2rem 0;
+}
 
-    .popup .close-btn:hover {
-      color: #000;
-    }
+/* Headers de sections */
+.login-header {
+  background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  margin: -2rem -2rem 2rem -2rem;
+  border-radius: 20px 20px 0 0;
+}
 
-    @keyframes fadeIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+.login-header h2, .form-section h2, .admin-section h2, .login-box h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: white;
+}
 
-    .process-flow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 2rem 0;
-      padding: 2rem;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      overflow-x: auto;
-    }
-    
-    .secondary-flow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 1rem 0;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      overflow-x: auto;
-    }
-    
-    .flow-step {
-      min-width: 120px;
-      text-align: center;
-      padding: 1rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid transparent;
-      position: relative;
-    }
-    
-    .flow-step:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      border-color: #006400;
-    }
-    
-    .flow-step.active {
-      border-color: #006400;
-      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
-    }
-    
-    .flow-step.secondary {
-      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-    }
-    
-    .step-icon {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .step-title {
-      font-weight: 600;
-      color: #006400;
-      margin-bottom: 0.3rem;
-    }
-    
-    .step-subtitle {
-      font-size: 0.8rem;
-      color: #666;
-      margin-bottom: 0.5rem;
-    }
-    
-    .step-indicator {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #ccc;
-    }
-    
-    .step-indicator.has-data {
-      background: #28a745;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    
-    .flow-arrow {
-      font-size: 1.5rem;
-      color: #006400;
-      margin: 0 0.5rem;
-    }
-    
-    .partie-details {
-      margin: 2rem 0;
-      padding: 2rem;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border: 1px solid #e0e0e0;
-    }
-    
-    .partie-details h4 {
-      color: #006400;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
-    }
-    
-    .details-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-    }
-    
-    .detail-card {
-      background: #f8f9fa;
-      padding: 1rem;
-      border-radius: 8px;
-      border-left: 4px solid #006400;
-    }
-    
-    .detail-card h5 {
-      margin: 0 0 0.5rem 0;
-      color: #006400;
-    }
-    
-    .detail-card p {
-      margin: 0;
-      color: #666;
-    }
-    
-    .table-container {
-      margin-top: 1rem;
-    }
-    
-    .table-container.hidden {
-      display: none;
-    }
-    
-    header {
-      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
-      color: white;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: 100%;
-    }
-    
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: 600;
-    }
-    
-    .container {
-      width: 100%;
-      min-height: 100vh;
-      padding: 0 1rem;
-    }
-    
-    .login-box {
-      max-width: 400px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
-      border: 1px solid #e0e0e0;
-    }
+.form-section h2, .admin-section h2, .login-box h2 {
+  color: #006400;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #006400;
+  padding-bottom: 0.5rem;
+}
 
-    .login-type-selector {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
+.login-header p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
 
-    .login-type-btn {
-      flex: 1;
-      padding: 1rem;
-      border: 2px solid #ddd;
-      background: white;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-align: center;
-    }
+/* Onglets de type de connexion */
+.login-type-tabs, .login-type-selector {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 0;
+  margin: 0 -2rem 2rem -2rem;
+  overflow: hidden;
+  gap: 1rem;
+}
 
-    .login-type-btn.active {
-      border-color: #006400;
-      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
-      color: #006400;
-      font-weight: 600;
-    }
+.login-type-selector {
+  margin: 0 0 2rem 0;
+  background: transparent;
+  border-radius: 8px;
+}
 
-    .login-type-btn:hover {
-      border-color: #006400;
-    }
-    
-    .form-section, .admin-section {
-      width: 100%;
-      max-width: none;
-      margin: 2rem 0;
-      background: white;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
-      border: 1px solid #e0e0e0;
-    }
-    
-    .form-section h2, .admin-section h2, .login-box h2 {
-      color: #006400;
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
-      border-bottom: 2px solid #006400;
-      padding-bottom: 0.5rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: #333;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: #006400;
-      box-shadow: 0 0 0 3px rgba(0,100,0,0.1);
-    }
-    
-    button {
-      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
-      color: white;
-      padding: 0.75rem 2rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    button:hover {
-      background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    
-    button:active {
-      transform: translateY(0);
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    th, td {
-      border: 1px solid #e0e0e0;
-      padding: 1rem;
-      text-align: center;
-    }
-    
-    th {
-      background: linear-gradient(135deg, #006400 0%, #228B22 100%);
-      color: white;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-    }
-    
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    
-    tr:hover {
-      background-color: #e8f5e8;
-    }
-    
-    .success-message {
-      background: #d4edda;
-      color: #155724;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      border: 1px solid #c3e6cb;
-      display: none;
-    }
-    
-    .error-message {
-      background: #f8d7da;
-      color: #721c24;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      border: 1px solid #f5c6cb;
-      display: none;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border: 1px solid #e0e0e0;
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #006400;
-      margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-      color: #666;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-    }
-    
-    .logout-btn {
-      background: #dc3545;
-      margin-left: 1rem;
-    }
-    
-    .logout-btn:hover {
-      background: #c82333;
-    }
-    
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      margin-top: 2rem;
-    }
-    
-    .reset-btn {
-      background: #6c757d;
-    }
-    
-    .reset-btn:hover {
-      background: #5a6268;
-    }
+.login-type-tab, .login-type-btn {
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  border-radius: 8px;
+}
 
-    /* Styles pour les graphiques */
-    .charts-section {
-      margin: 2rem 0;
-      padding: 2rem;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border: 1px solid #e0e0e0;
-    }
+.login-type-tab {
+  border: none;
+  border-radius: 0;
+}
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
-    }
+.login-type-tab.active, .login-type-btn.active {
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+  color: #006400;
+  font-weight: 600;
+  border-color: #006400;
+}
 
-    .chart-container {
-      background: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid #dee2e6;
-    }
+.login-type-tab.active {
+  background: white;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
 
-    .chart-title {
-      color: #006400;
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
+.login-type-tab:hover:not(.active), .login-type-btn:hover {
+  background: #e9ecef;
+  color: #333;
+  border-color: #006400;
+}
 
-    .chart-canvas {
-      width: 100% !important;
-      height: 300px !important;
-    }
+/* Formulaires */
+.auth-form {
+  transition: all 0.3s ease;
+}
 
-    .no-data-message {
-      text-align: center;
-      color: #666;
-      font-style: italic;
-      padding: 2rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 0.5rem;
-      }
-      
-      .login-box, .form-section, .admin-section {
-        margin: 1rem 0;
-        padding: 1rem;
-      }
-      
-      .form-actions {
-        flex-direction: column;
-      }
-      
-      table {
-        font-size: 0.9rem;
-      }
-      
-      th, td {
-        padding: 0.5rem;
-      }
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
 
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+.form-group.fade-in {
+  animation: fadeInUp 0.5s ease;
+}
+
+.form-group label, label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* Conteneurs d'input */
+.input-container {
+  position: relative;
+}
+
+.form-group input, input, select {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-group input {
+  padding-left: 2.8rem;
+}
+
+input, select {
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.form-group input:focus, input:focus, select:focus {
+  outline: none;
+  border-color: #006400;
+  box-shadow: 0 0 0 3px rgba(0,100,0,0.1);
+  transform: translateY(-1px);
+}
+
+input:focus, select:focus {
+  transform: none;
+}
+
+/* Icônes dans les inputs */
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  cursor: pointer;
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: #006400;
+}
+
+/* Boutons */
+.auth-button, button {
+  background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,100,0,0.3);
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+button {
+  width: auto;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 0;
+}
+
+.auth-button:hover, button:hover {
+  background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,100,0,0.4);
+}
+
+button:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.auth-button:active, button:active {
+  transform: translateY(0);
+}
+
+.auth-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Boutons spéciaux */
+.logout-btn {
+  background: #dc3545;
+  margin-left: 1rem;
+}
+
+.logout-btn:hover {
+  background: #c82333;
+}
+
+.reset-btn {
+  background: #6c757d;
+}
+
+.reset-btn:hover {
+  background: #5a6268;
+}
+
+/* Actions de formulaire */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+/* Liens d'authentification */
+.auth-toggle {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.auth-toggle p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.auth-toggle a {
+  color: #006400;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.auth-toggle a:hover {
+  color: #228B22;
+  text-decoration: underline;
+}
+
+/* Alertes et messages */
+.alert, .success-message, .error-message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  display: none;
+  animation: slideIn 0.3s ease;
+}
+
+.alert.success, .success-message {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert.error, .error-message {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Spinner de chargement */
+.loading-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+/* Styles admin */
+.admin-login {
+  background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+}
+
+.admin-login .login-header {
+  background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+}
+
+.admin-login .auth-button {
+  background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+}
+
+.admin-login .auth-button:hover {
+  background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+}
+
+.admin-login .form-group input:focus {
+  border-color: #495057;
+  box-shadow: 0 0 0 3px rgba(73,80,87,0.1);
+}
+
+.admin-login .auth-toggle a {
+  color: #495057;
+}
+
+/* Force du mot de passe */
+.password-strength {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.strength-bar {
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-weak { background: #dc3545; width: 25%; }
+.strength-fair { background: #ffc107; width: 50%; }
+.strength-good { background: #28a745; width: 75%; }
+.strength-strong { background: #006400; width: 100%; }
+
+/* Flux de processus */
+.process-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.secondary-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.flow-step {
+  min-width: 120px;
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.flow-step:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  border-color: #006400;
+}
+
+.flow-step.active {
+  border-color: #006400;
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+}
+
+.flow-step.secondary {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.step-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-title {
+  font-weight: 600;
+  color: #006400;
+  margin-bottom: 0.3rem;
+}
+
+.step-subtitle {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.step-indicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.step-indicator.has-data {
+  background: #28a745;
+  animation: pulse 2s infinite;
+}
+
+.flow-arrow {
+  font-size: 1.5rem;
+  color: #006400;
+  margin: 0 0.5rem;
+}
+
+/* Détails des parties */
+.partie-details {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.partie-details h4 {
+  color: #006400;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.details-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.detail-card {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #006400;
+}
+
+.detail-card h5 {
+  margin: 0 0 0.5rem 0;
+  color: #006400;
+}
+
+.detail-card p {
+  margin: 0;
+  color: #666;
+}
+
+/* Tableaux */
+.table-container {
+  margin-top: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  text-align: center;
+}
+
+th {
+  background: linear-gradient(135deg, #006400 0%, #228B22 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tr:hover {
+  background-color: #e8f5e8;
+}
+
+/* Statistiques */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #006400;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Popup */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup h3 {
+  color: #006400;
+  margin-top: 0;
+}
+
+.popup .close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.popup .close-btn:hover {
+  color: #000;
+}
+
+/* Graphiques */
+.charts-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.chart-container {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.chart-title {
+  color: #006400;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.chart-canvas {
+  width: 100% !important;
+  height: 300px !important;
+}
+
+.no-data-message {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Classes utilitaires */
+.hidden {
+  display: none;
+}
+
+.table-container.hidden {
+  display: none;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .login-container, .login-box, .form-section, .admin-section {
+    max-width: 100%;
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  
+  .login-header {
+    margin: -1rem -1rem 1rem -1rem;
+  }
+  
+  .login-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .login-type-tabs {
+    margin: 0 -1rem 2rem -1rem;
+  }
+  
+  .login-type-tab {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  table {
+    font-size: 0.9rem;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+    </style>
 </head>
 <body>
 
@@ -548,49 +826,86 @@
 </header>
 
 <div class="container">
-  <div class="login-box" id="loginBox">
-    <h2>Connexion</h2>
-    <div class="login-type-selector">
-      <div class="login-type-btn active" onclick="selectLoginType('user')">
-        <div>👤</div>
-        <div>Utilisateur</div>
-      </div>
-      <div class="login-type-btn" onclick="selectLoginType('admin')">
-        <div>🔐</div>
-        <div>Administrateur</div>
-      </div>
-    </div>
-    
-    <div class="error-message" id="loginError"></div>
-    
-    <div id="userLogin">
-      <div id="loginForm">
-        <div class="form-group">
-          <label for="userEmail">Email</label>
-          <input type="email" id="userEmail" placeholder="votre@email.com" required>
-        </div>
-        <div class="form-group">
-          <label for="userPassword">Mot de passe</label>
-          <input type="password" id="userPassword" placeholder="Mot de passe" required>
-        </div>
-        <div class="form-group">
-          <label for="userFullName">Nom complet</label>
-          <input type="text" id="userFullName" placeholder="Votre nom complet" required>
-        </div>
-        <button type="button" id="authSubmitBtn" onclick="handleAuth()">Se connecter</button>
-        <p style="text-align: center; margin-top: 1rem;">
-          <span id="authToggleText">Pas de compte ?</span>
-          <a href="#" onclick="toggleAuthMode()" style="color: #006400;">Créer un compte</a>
-        </p>
-      </div>
+  <div class="login-container" id="loginContainer">
+    <div class="login-header">
+      <h2 id="loginTitle">Bienvenue</h2>
+      <p id="loginSubtitle">Connectez-vous pour accéder à votre tableau de bord</p>
     </div>
 
-    <div id="adminLogin" class="hidden">
-      <div class="form-group">
-        <label for="adminPass">Mot de passe administrateur</label>
-        <input type="password" id="adminPass" placeholder="Saisissez le mot de passe">
+    <div class="login-type-tabs">
+      <button class="login-type-tab active" onclick="selectLoginType('user')">
+        <span>👤</span>
+        <span>Utilisateur</span>
+      </button>
+      <button class="login-type-tab" onclick="selectLoginType('admin')">
+        <span>🔐</span>
+        <span>Administrateur</span>
+      </button>
+    </div>
+
+    <div class="login-body">
+      <div class="alert" id="loginAlert" style="display: none;"></div>
+
+      <!-- Formulaire Utilisateur -->
+      <div id="userAuthForm" class="auth-form">
+        <div class="form-group">
+          <label for="userEmail">Adresse email</label>
+          <div class="input-container">
+            <input type="email" id="userEmail" placeholder="votre@email.com" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="userPassword">Mot de passe</label>
+          <div class="input-container">
+            <input type="password" id="userPassword" placeholder="Votre mot de passe" required>
+            <span class="password-toggle" onclick="togglePassword('userPassword')">👁️</span>
+          </div>
+          <div class="password-strength" id="passwordStrength"></div>
+        </div>
+
+        <div class="form-group fade-in hidden" id="nameGroup">
+          <label for="userFullName">Nom complet</label>
+          <div class="input-container">
+            <input type="text" id="userFullName" placeholder="Votre nom complet">
+          </div>
+        </div>
+
+        <button type="button" class="auth-button" id="authSubmitBtn" onclick="handleAuth()">
+          <span class="loading-spinner" id="loadingSpinner"></span>
+          <span id="authButtonText">Se connecter</span>
+        </button>
+
+        <div class="auth-toggle">
+          <p>
+            <span id="authToggleText">Pas encore de compte ?</span>
+            <a href="#" onclick="toggleAuthMode()">Créer un compte</a>
+          </p>
+        </div>
       </div>
-      <button onclick="adminLogin()">Se connecter</button>
+
+      <!-- Formulaire Administrateur -->
+      <div id="adminAuthForm" class="auth-form hidden">
+        <div class="form-group">
+          <label for="adminPassword">Mot de passe administrateur</label>
+          <div class="input-container">
+            <span class="input-icon"></span>
+            <input type="password" id="adminPassword" placeholder="Mot de passe administrateur" required>
+            <span class="password-toggle" onclick="togglePassword('adminPassword')">👁️</span>
+          </div>
+        </div>
+
+        <button type="button" class="auth-button" onclick="adminLogin()">
+          <span class="loading-spinner" id="adminLoadingSpinner"></span>
+          <span>Connexion Administrateur</span>
+        </button>
+
+        <div class="auth-toggle">
+          <p>
+            <a href="#" onclick="selectLoginType('user')">← Retour à la connexion utilisateur</a>
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -601,7 +916,7 @@
     
     <form id="productForm">
       <div class="form-group">
-        <label for="stock">Stock *</label>
+        <label for="stock">Stock </label>
         <select id="stock" required>
           <option value="">Sélectionnez un stock</option>
           <option value="Sidi Chennane Carreau">Sidi Chennane Carreau</option>
@@ -612,22 +927,22 @@
       </div>
       
       <div class="form-group">
-        <label for="stockValue">Valeur Stock (K TSM) *</label>
+        <label for="stockValue">Valeur Stock (K TSM) </label>
         <input type="number" id="stockValue" min="0" step="0.01" required>
       </div>
       
       <div class="form-group">
-        <label for="cd">Concentration Cd (mg/Kg) *</label>
+        <label for="cd">Concentration Cd (mg/Kg) </label>
         <input type="number" id="cd" min="0" step="0.01" required>
       </div>
       
       <div class="form-group">
-        <label for="responsable">Responsable *</label>
+        <label for="responsable">Responsable </label>
         <input type="text" id="responsable" required>
       </div>
       
       <div class="form-group">
-        <label for="date">Date *</label>
+        <label for="date">Date </label>
         <input type="date" id="date" required>
       </div>
       
@@ -639,6 +954,7 @@
     </form>
   </div>
 
+  <!-- SECTION ADMIN -->
   <div class="admin-section hidden" id="adminSection">
     <h2>Tableau de Bord Administrateur</h2>
 
@@ -754,11 +1070,11 @@
 <script>
 // Variables globales
 let currentUser = null;
-let isRegistering = false; // Commencer en mode connexion
+let isRegistering = false;
+let currentLoginType = 'user';
 let supabaseClient;
 let donnees = [];
-let chartInstances = {}; // Pour stocker toutes les instances de graphiques
-let currentLoginType = 'user';
+let chartInstances = {};
 
 // Initialisation Supabase
 try {
@@ -772,64 +1088,64 @@ try {
 
 // Fonction d'initialisation complète
 document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById('date').valueAsDate = new Date();
+  initializeForm();
+  setupEventListeners();
+  await init();
+});
 
+function initializeForm() {
+  document.getElementById('date').valueAsDate = new Date();
+  initializeAuthForm();
+  
   document.getElementById('productForm').addEventListener('submit', function(e) {
     e.preventDefault();
     enregistrerDonnees();
   });
+}
 
-  // Initialiser le formulaire en mode connexion par défaut
-  initializeAuthForm();
-  
-  // Enter pour connexion
-  document.getElementById('adminPass').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') adminLogin();
+function setupEventListeners() {
+  document.getElementById('userPassword').addEventListener('input', function() {
+    checkPasswordStrength(this.value);
   });
-
+  
   document.getElementById('userEmail').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleAuth();
   });
-
+  
   document.getElementById('userPassword').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleAuth();
   });
-
-  // Fermer la popup en cliquant à l'extérieur
+  
+  document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') adminLogin();
+  });
+  
   document.getElementById('popupOverlay').addEventListener('click', function(e) {
     if (e.target === this) {
       closePopup();
     }
   });
 
-  // Gestion des touches clavier pour la popup
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closePopup();
     }
   });
+}
 
-  // Chargement initial des données
-  await init();
-});
-
-// Fonction pour initialiser le formulaire d'authentification
 function initializeAuthForm() {
-  const submitBtn = document.getElementById('authSubmitBtn');
+  const buttonText = document.getElementById('authButtonText');
   const toggleText = document.getElementById('authToggleText');
-  const nameField = document.getElementById('userFullName');
+  const nameGroup = document.getElementById('nameGroup');
   
-  // Mode connexion par défaut
-  submitBtn.textContent = 'Se connecter';
-  toggleText.textContent = 'Pas de compte ?';
-  nameField.style.display = 'none';
-  nameField.required = false;
+  buttonText.textContent = 'Se connecter';
+  toggleText.textContent = 'Pas encore de compte ?';
+  nameGroup.classList.add('hidden');
+  document.getElementById('userFullName').required = false;
   isRegistering = false;
 }
 
-// Fonction d'initialisation globale
 async function init() {
-  // Vérifier l'authentification
   const { data: { user } } = await supabaseClient.auth.getUser();
   currentUser = user;
   try {
@@ -843,116 +1159,104 @@ async function init() {
   }
 }
 
-// Fonction pour sélectionner le type de connexion
-function selectLoginType(type) {
-  currentLoginType = type;
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const toggle = input.nextElementSibling;
   
-  // Mise à jour des boutons
-  document.querySelectorAll('.login-type-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  
-  if (type === 'user') {
-    document.querySelector('.login-type-btn').classList.add('active');
-    document.getElementById('userLogin').style.display = 'block';
-    document.getElementById('adminLogin').style.display = 'none';
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.textContent = '👁️';
   } else {
-    document.querySelectorAll('.login-type-btn')[1].classList.add('active');
-    document.getElementById('userLogin').style.display = 'none';
-    document.getElementById('adminLogin').style.display = 'block';
+    input.type = 'password';
+    toggle.textContent = '👁';
   }
 }
 
-// Fonction pour basculer entre connexion et inscription
-function toggleAuthMode() {
-  isRegistering = !isRegistering;
-  const submitBtn = document.getElementById('authSubmitBtn');
-  const toggleText = document.getElementById('authToggleText');
-  const nameField = document.getElementById('userFullName');
+function checkPasswordStrength(password) {
+  const strengthDiv = document.getElementById('passwordStrength');
   
-  if (isRegistering) {
-    submitBtn.textContent = 'Créer un compte';
-    toggleText.textContent = 'Déjà un compte ?';
-    nameField.style.display = 'block';
-    nameField.required = true;
-  } else {
-    submitBtn.textContent = 'Se connecter';
-    toggleText.textContent = 'Pas de compte ?';
-    nameField.style.display = 'none';
-    nameField.required = false;
-  }
-}
-
-// Fonction pour gérer l'authentification (connexion/inscription)
-async function handleAuth() {
-  const email = document.getElementById('userEmail').value;
-  const password = document.getElementById('userPassword').value;
-  const fullName = document.getElementById('userFullName').value;
-  
-  if (!email || !password || (isRegistering && !fullName)) {
-    showError('Veuillez remplir tous les champs obligatoires');
+  if (!password) {
+    strengthDiv.innerHTML = '';
     return;
   }
   
+  let strength = 0;
+  let feedback = '';
+  
+  if (password.length >= 8) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  
+  switch (strength) {
+    case 0:
+    case 1:
+      feedback = 'Très faible';
+      strengthDiv.innerHTML = `
+        <div>Force: ${feedback}</div>
+        <div class="strength-bar"><div class="strength-fill strength-weak"></div></div>
+      `;
+      break;
+    case 2:
+      feedback = 'Faible';
+      strengthDiv.innerHTML = `
+        <div>Force: ${feedback}</div>
+        <div class="strength-bar"><div class="strength-fill strength-fair"></div></div>
+      `;
+      break;
+    case 3:
+      feedback = 'Moyenne';
+      strengthDiv.innerHTML = `
+        <div>Force: ${feedback}</div>
+        <div class="strength-bar"><div class="strength-fill strength-good"></div></div>
+      `;
+      break;
+    case 4:
+    case 5:
+      feedback = 'Forte';
+      strengthDiv.innerHTML = `
+        <div>Force: ${feedback}</div>
+        <div class="strength-bar"><div class="strength-fill strength-strong"></div></div>
+      `;
+      break;
+  }
+}
+
+async function adminLogin() {
+  const password = document.getElementById('adminPassword').value;
+  
+  if (!password) {
+    showAlert('Veuillez saisir le mot de passe administrateur', 'error');
+    return;
+  }
+  
+  showLoading('adminLoadingSpinner');
+  
   try {
-    if (isRegistering) {
-      // Inscription
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName
-          }
-        }
-      });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    if (password === 'admin123') {
+      showAlert('Connexion administrateur réussie ! Redirection en cours...', 'success');
       
-      if (error) throw error;
-      
-      showSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre compte.');
-      
-      // Basculer vers le mode connexion
-      toggleAuthMode();
-      
+      setTimeout(() => {
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('adminSection').classList.remove('hidden');
+        
+        currentUser = { role: 'admin', email: 'admin@system.local' };
+        
+        init();
+      }, 1500);
     } else {
-      // Connexion
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-      
-      if (error) throw error;
-      
-      currentUser = data.user;
-      document.getElementById('loginBox').classList.add('hidden');
-      document.getElementById('dataForm').classList.remove('hidden');
-      
-      showSuccess('Connexion réussie !');
+      showAlert('Mot de passe administrateur incorrect', 'error');
     }
   } catch (error) {
-    console.error('Erreur authentification:', error);
-    showError(error.message || 'Erreur lors de l\'authentification');
+    showAlert('Erreur lors de la connexion', 'error');
+  } finally {
+    hideLoading('adminLoadingSpinner');
   }
 }
 
-// Fonction pour la connexion administrateur
-async function adminLogin() {
-  const password = document.getElementById('adminPass').value;
-  
-  if (password === 'admin123') {
-    document.getElementById('loginBox').classList.add('hidden');
-    document.getElementById('adminSection').classList.remove('hidden');
-    
-    // Chargement des données admin
-    await init();
-    
-    showSuccess('Connexion administrateur réussie !');
-  } else {
-    showError('Mot de passe administrateur incorrect');
-  }
-}
-
-// Fonction pour charger les données depuis Supabase
 async function chargerDonneesDepuisSupabase() {
   try {
     const { data, error } = await supabaseClient
@@ -969,7 +1273,6 @@ async function chargerDonneesDepuisSupabase() {
   }
 }
 
-// Fonction pour enregistrer les données
 async function enregistrerDonnees() {
   const stock = document.getElementById('stock').value;
   const stockValue = parseFloat(document.getElementById('stockValue').value);
@@ -1002,22 +1305,23 @@ async function enregistrerDonnees() {
     
     showSuccess('Données enregistrées avec succès !');
     resetForm();
-    
-    // Recharger les données
     donnees = await chargerDonneesDepuisSupabase();
+    updateStats();
+    renderAllCharts();
+    updateFlowIndicators();
+    remplirTableau();
     
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement:', error);
     showError(`Erreur lors de l'enregistrement: ${error.message || 'Erreur inconnue'}`);
   }
 }
-// Fonction pour réinitialiser le formulaire
+
 function resetForm() {
   document.getElementById('productForm').reset();
   document.getElementById('date').valueAsDate = new Date();
 }
 
-// Fonction pour afficher un message de succès
 function showSuccess(message) {
   const successDiv = document.getElementById('successMessage');
   successDiv.textContent = message;
@@ -1028,7 +1332,6 @@ function showSuccess(message) {
   }, 5000);
 }
 
-// Fonction pour afficher un message d'erreur
 function showError(message) {
   const errorDiv = document.getElementById('errorMessage') || document.getElementById('loginError');
   errorDiv.textContent = message;
@@ -1039,34 +1342,58 @@ function showError(message) {
   }, 5000);
 }
 
-// Fonction pour se déconnecter
 async function logout() {
-  try {
-    await supabaseClient.auth.signOut();
-    currentUser = null;
-    
-    // Réinitialiser l'interface
-    document.getElementById('loginBox').classList.remove('hidden');
-    document.getElementById('dataForm').classList.add('hidden');
-    document.getElementById('adminSection').classList.add('hidden');
-    
-    // Réinitialiser les champs
-    document.getElementById('userEmail').value = '';
-    document.getElementById('userPassword').value = '';
-    document.getElementById('userFullName').value = '';
-    document.getElementById('adminPass').value = '';
-    
-    // Réinitialiser le mode de connexion
-    selectLoginType('user');
-    initializeAuthForm();
-    
-    showSuccess('Déconnexion réussie !');
-  } catch (error) {
-    console.error('Erreur lors de la déconnexion:', error);
-  }
+  currentUser = null;
+  
+  document.getElementById('loginContainer').classList.remove('hidden');
+  document.getElementById('dataForm').classList.add('hidden');
+  document.getElementById('adminSection').classList.add('hidden');
+  
+  clearForm();
+  document.getElementById('adminPassword').value = '';
+  
+  selectLoginType('user');
+  initializeAuthForm();
+  
+  showAlert('Déconnexion réussie !', 'success');
 }
 
-// Fonction pour mettre à jour les statistiques
+function clearForm() {
+  document.getElementById('userEmail').value = '';
+  document.getElementById('userPassword').value = '';
+  document.getElementById('userFullName').value = '';
+  document.getElementById('passwordStrength').innerHTML = '';
+}
+
+function showAlert(message, type) {
+  const alert = document.getElementById('loginAlert');
+  alert.textContent = message;
+  alert.className = `alert ${type}`;
+  alert.style.display = 'block';
+  
+  setTimeout(() => {
+    hideAlert();
+  }, 5000);
+}
+
+function hideAlert() {
+  const alert = document.getElementById('loginAlert');
+  alert.style.display = 'none';
+}
+
+function showLoading(spinnerId) {
+  document.getElementById(spinnerId).style.display = 'inline-block';
+}
+
+function hideLoading(spinnerId) {
+  document.getElementById(spinnerId).style.display = 'none';
+}
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 function updateStats() {
   const totalEntries = donnees.length;
   const avgCd = donnees.length > 0 ? (donnees.reduce((sum, item) => sum + item.cd, 0) / donnees.length).toFixed(2) : 0;
@@ -1077,100 +1404,19 @@ function updateStats() {
   document.getElementById('totalStock').textContent = totalStock;
 }
 
-// Fonction pour mettre à jour les indicateurs de flux
 function updateFlowIndicators() {
   const stocks = ['Sidi Chennane Carreau', 'Park Elouafi', 'Beni Idir', 'JPH'];
   
-  stocks.forEach(stockName => {
-    const indicator = document.getElementById(`indicator-${stockName}`);
-    const hasData = donnees.some(item => item.stock === stockName);
+  stocks.forEach(stock => {
+    const indicator = document.getElementById(`indicator-${stock}`);
+    const hasData = donnees.some(item => item.stock === stock);
     
     if (hasData) {
       indicator.classList.add('has-data');
-    } else {
+} else {
       indicator.classList.remove('has-data');
     }
   });
-}
-
-// Fonction pour afficher les données d'un stock
-function showStockData(stockName) {
-  const stockData = donnees.filter(item => item.stock === stockName);
-  
-  // Mettre à jour le titre
-  document.getElementById('stockDetailsTitle').textContent = `Données pour ${stockName}`;
-  
-  // Effacer les anciennes données
-  document.querySelectorAll('.flow-step').forEach(step => {
-    step.classList.remove('active');
-  });
-  
-  // Marquer l'étape active
-  document.querySelector(`[data-stock="${stockName}"]`).classList.add('active');
-  
-  if (stockData.length > 0) {
-    const latestData = stockData[0]; // Données les plus récentes
-    const totalValue = stockData.reduce((sum, item) => sum + item.stockValue, 0);
-    const avgCd = stockData.reduce((sum, item) => sum + item.cd, 0) / stockData.length;
-    
-    document.getElementById('stockDetailsContent').innerHTML = `
-      <div class="detail-card">
-        <h5>Dernière mise à jour</h5>
-        <p>${new Date(latestData.date).toLocaleDateString('fr-FR')}</p>
-      </div>
-      <div class="detail-card">
-        <h5>Valeur totale</h5>
-        <p>${totalValue.toFixed(2)} K TSM</p>
-      </div>
-      <div class="detail-card">
-        <h5>Cd moyen</h5>
-        <p>${avgCd.toFixed(2)} mg/Kg</p>
-      </div>
-      <div class="detail-card">
-        <h5>Nombre d'entrées</h5>
-        <p>${stockData.length}</p>
-      </div>
-      <div class="detail-card">
-        <h5>Dernier responsable</h5>
-        <p>${latestData.responsable}</p>
-      </div>
-    `;
-  } else {
-    document.getElementById('stockDetailsContent').innerHTML = `
-      <div class="no-data-message">
-        Aucune donnée disponible pour ce stock.
-      </div>
-    `;
-  }
-}
-
-// Fonction pour remplir le tableau
-function remplirTableau() {
-  const tableBody = document.getElementById('dataTable');
-  tableBody.innerHTML = '';
-  
-  donnees.forEach(item => {
-    const row = tableBody.insertRow();
-    row.insertCell(0).textContent = item.stock;
-    row.insertCell(1).textContent = item.stockValue;
-    row.insertCell(2).textContent = item.cd;
-    row.insertCell(3).textContent = item.responsable;
-    row.insertCell(4).textContent = new Date(item.date).toLocaleDateString('fr-FR');
-  });
-}
-
-// Fonction pour basculer l'affichage du tableau
-function toggleTableView() {
-  const tableContainer = document.getElementById('tableContainer');
-  const toggleBtn = document.getElementById('toggleTableBtn');
-  
-  if (tableContainer.classList.contains('hidden')) {
-    tableContainer.classList.remove('hidden');
-    toggleBtn.textContent = 'Masquer le tableau';
-  } else {
-    tableContainer.classList.add('hidden');
-    toggleBtn.textContent = 'Afficher le tableau';
-  }
 }
 
 // Fonction pour générer tous les graphiques
@@ -1288,49 +1534,302 @@ chartInstances[`${stockName}-stock`] = new Chart(stockCtx, {
   }
 });
 }
-// Fonction pour exporter vers Excel
+function showStockData(stockName) {
+  // Réinitialiser les styles
+  document.querySelectorAll('.flow-step').forEach(step => {
+    step.classList.remove('active');
+  });
+  
+  // Activer le stock sélectionné
+  document.querySelector(`[data-stock="${stockName}"]`).classList.add('active');
+  
+  const stockData = donnees.filter(item => item.stock === stockName);
+  const detailsTitle = document.getElementById('stockDetailsTitle');
+  const detailsContent = document.getElementById('stockDetailsContent');
+  
+  detailsTitle.textContent = `Détails - ${stockName}`;
+  
+  if (stockData.length === 0) {
+    detailsContent.innerHTML = '<p class="no-data-message">Aucune donnée disponible pour ce stock.</p>';
+    return;
+  }
+  
+  // Trier par date décroissante
+  stockData.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Statistiques du stock
+  const totalEntries = stockData.length;
+  const avgCd = (stockData.reduce((sum, item) => sum + item.cd, 0) / stockData.length).toFixed(2);
+  const totalStockValue = stockData.reduce((sum, item) => sum + item.stockValue, 0).toFixed(2);
+  const latestEntry = stockData[0];
+  
+  detailsContent.innerHTML = `
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+      <div class="detail-card">
+        <strong>Nombre d'entrées:</strong><br>${totalEntries}
+      </div>
+      <div class="detail-card">
+        <strong>Cd moyen:</strong><br>${avgCd} mg/Kg
+      </div>
+      <div class="detail-card">
+        <strong>Stock total:</strong><br>${totalStockValue} K TSM
+      </div>
+      <div class="detail-card">
+        <strong>Dernière mise à jour:</strong><br>${new Date(latestEntry.date).toLocaleDateString('fr-FR')}
+      </div>
+    </div>
+    
+    <h5>Dernières entrées (5 plus récentes):</h5>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">Date</th>
+            <th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">Valeur Stock</th>
+            <th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">Concentration Cd</th>
+            <th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">Responsable</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stockData.slice(0, 5).map(item => `
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">${new Date(item.date).toLocaleDateString('fr-FR')}</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${item.stockValue} K TSM</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${item.cd} mg/Kg</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${item.responsable}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function remplirTableau() {
+  const tableBody = document.getElementById('dataTable');
+  tableBody.innerHTML = '';
+  
+  if (donnees.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">Aucune donnée disponible</td></tr>';
+    return;
+  }
+  
+  // Trier par date décroissante
+  const sortedData = [...donnees].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  sortedData.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.stock}</td>
+      <td>${item.stockValue} K TSM</td>
+      <td>${item.cd} mg/Kg</td>
+      <td>${item.responsable}</td>
+      <td>${new Date(item.date).toLocaleDateString('fr-FR')}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function toggleTableView() {
+  const tableContainer = document.getElementById('tableContainer');
+  const toggleBtn = document.getElementById('toggleTableBtn');
+  
+  if (tableContainer.classList.contains('hidden')) {
+    tableContainer.classList.remove('hidden');
+    toggleBtn.textContent = 'Masquer le tableau';
+  } else {
+    tableContainer.classList.add('hidden');
+    toggleBtn.textContent = 'Afficher le tableau';
+  }
+}
+
 function exporterExcel() {
   if (donnees.length === 0) {
     showError('Aucune donnée à exporter');
     return;
   }
   
-  // Préparer les données pour l'export
-  const dataForExport = donnees.map(item => ({
-    'Stock': item.stock,
-    'Valeur Stock (K TSM)': item.stockValue,
-    'Concentration Cd (mg/Kg)': item.cd,
-    'Responsable': item.responsable,
-    'Date': new Date(item.date).toLocaleDateString('fr-FR')
-  }));
-  
-  // Créer le workbook
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(dataForExport);
-  
-  // Ajouter la feuille au workbook
-  XLSX.utils.book_append_sheet(wb, ws, 'Données Produit');
-  
-  // Générer le fichier Excel
-  const fileName = `donnees_produit_${new Date().toISOString().split('T')[0]}.xlsx`;
-  XLSX.writeFile(wb, fileName);
-  
-  showSuccess('Export Excel réussi !');
+  try {
+    const worksheet = XLSX.utils.json_to_sheet(donnees.map(item => ({
+      'Stock': item.stock,
+      'Valeur Stock (K TSM)': item.stockValue,
+      'Concentration Cd (mg/Kg)': item.cd,
+      'Responsable': item.responsable,
+      'Date': new Date(item.date).toLocaleDateString('fr-FR')
+    })));
+    
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Données JLC');
+    
+    const fileName = `donnees_jlc_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    showAlert('Export Excel réussi !', 'success');
+  } catch (error) {
+    console.error('Erreur lors de l\'export:', error);
+    showError('Erreur lors de l\'export Excel');
+  }
 }
 
-// Fonction pour fermer la popup
-function closePopup() {
-  document.getElementById('popupOverlay').classList.add('hidden');
+function selectLoginType(type) {
+  currentLoginType = type;
+  
+  // Mettre à jour les onglets
+  document.querySelectorAll('.login-type-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  if (type === 'user') {
+    document.querySelector('.login-type-tab:first-child').classList.add('active');
+    document.getElementById('userAuthForm').classList.remove('hidden');
+    document.getElementById('adminAuthForm').classList.add('hidden');
+    document.getElementById('loginTitle').textContent = 'Connexion Utilisateur';
+    document.getElementById('loginSubtitle').textContent = 'Connectez-vous pour enregistrer des données';
+  } else {
+    document.querySelector('.login-type-tab:last-child').classList.add('active');
+    document.getElementById('userAuthForm').classList.add('hidden');
+    document.getElementById('adminAuthForm').classList.remove('hidden');
+    document.getElementById('loginTitle').textContent = 'Connexion Administrateur';
+    document.getElementById('loginSubtitle').textContent = 'Accédez au tableau de bord administrateur';
+  }
+  
+  hideAlert();
 }
 
-// Fonction pour afficher la popup
+function toggleAuthMode() {
+  isRegistering = !isRegistering;
+  
+  const buttonText = document.getElementById('authButtonText');
+  const toggleText = document.getElementById('authToggleText');
+  const nameGroup = document.getElementById('nameGroup');
+  const fullNameInput = document.getElementById('userFullName');
+  
+  if (isRegistering) {
+    buttonText.textContent = 'Créer un compte';
+    toggleText.textContent = 'Déjà un compte ?';
+    nameGroup.classList.remove('hidden');
+    fullNameInput.required = true;
+  } else {
+    buttonText.textContent = 'Se connecter';
+    toggleText.textContent = 'Pas encore de compte ?';
+    nameGroup.classList.add('hidden');
+    fullNameInput.required = false;
+  }
+  
+  hideAlert();
+}
+
+async function handleAuth() {
+  const email = document.getElementById('userEmail').value;
+  const password = document.getElementById('userPassword').value;
+  const fullName = document.getElementById('userFullName').value;
+  
+  if (!email || !password) {
+    showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+    return;
+  }
+  
+  if (!isValidEmail(email)) {
+    showAlert('Veuillez saisir une adresse email valide', 'error');
+    return;
+  }
+  
+  if (password.length < 6) {
+    showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
+    return;
+  }
+  
+  if (isRegistering && !fullName) {
+    showAlert('Veuillez saisir votre nom complet', 'error');
+    return;
+  }
+  
+  showLoading('loadingSpinner');
+  
+  try {
+    let result;
+    
+    if (isRegistering) {
+      result = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName
+          }
+        }
+      });
+      
+      if (result.error) throw result.error;
+      
+      showAlert('Compte créé avec succès ! Vérifiez votre email pour confirmer votre compte.', 'success');
+      
+      setTimeout(() => {
+        toggleAuthMode();
+      }, 2000);
+      
+    } else {
+      result = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (result.error) throw result.error;
+      
+      currentUser = result.data.user;
+      showAlert('Connexion réussie ! Redirection en cours...', 'success');
+      
+      setTimeout(() => {
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('dataForm').classList.remove('hidden');
+      }, 1500);
+    }
+    
+  } catch (error) {
+    console.error('Erreur d\'authentification:', error);
+    
+    let errorMessage = 'Erreur lors de l\'authentification';
+    
+    if (error.message.includes('Invalid login credentials')) {
+      errorMessage = 'Email ou mot de passe incorrect';
+    } else if (error.message.includes('User already registered')) {
+      errorMessage = 'Un compte existe déjà avec cette adresse email';
+    } else if (error.message.includes('Email not confirmed')) {
+      errorMessage = 'Veuillez confirmer votre email avant de vous connecter';
+    }
+    
+    showAlert(errorMessage, 'error');
+    
+  } finally {
+    hideLoading('loadingSpinner');
+  }
+}
+
 function showPopup(title, content) {
   document.getElementById('popupTitle').textContent = title;
   document.getElementById('popupContent').innerHTML = content;
   document.getElementById('popupOverlay').classList.remove('hidden');
 }
 
-</script>
+function closePopup() {
+  document.getElementById('popupOverlay').classList.add('hidden');
+}
 
+// Gestion des erreurs globales
+window.addEventListener('error', function(event) {
+  console.error('Erreur globale:', event.error);
+});
+
+// Gestion des promesses rejetées
+window.addEventListener('unhandledrejection', function(event) {
+  console.error('Promesse rejetée:', event.reason);
+});
+
+// Initialisation au chargement complet de la page
+window.addEventListener('load', function() {
+  console.log('Application JLC chargée avec succès');
+});     
+
+</script>
 </body>
 </html>
